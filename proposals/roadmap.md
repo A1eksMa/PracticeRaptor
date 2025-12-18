@@ -14,7 +14,7 @@
 | Зависимости | Минимум: только стандартная библиотека Python |
 
 ### Основная функциональность
-- Загрузка случайной задачи из JSON-файла
+- Загрузка задачи из JSON-файла
 - Отображение условия задачи и примеров
 - Приём кода решения от пользователя
 - Выполнение кода против набора тестов
@@ -36,19 +36,21 @@ leetcode-prototype/
 ├── task_loader.py          # Загрузка задач из JSON
 ├── executor.py             # Выполнение пользовательского кода
 ├── validator.py            # Сравнение результатов с ожидаемыми
+├── selector.py             # Выбор задачи из списка
 ├── tasks/
-│   ├── two_sum.json        # Задача 1
-│   ├── reverse_string.json # Задача 2
-│   └── palindrome.json     # Задача 3
+│   ├── 1_two_sum.json        # Задача 1
+│   ├── 2_reverse_string.json # Задача 2
+│   └── 3_palindrome.json     # Задача 3
 └── README.md
 ```
 
 ### Формат JSON-файла задачи
 ```json
 {
-  "id": "two_sum",
+  "id": 1,
   "title": "Two Sum",
   "difficulty": "easy",
+  "tags": ["array"],
   "description": "Дано массив чисел nums и целое число target...",
   "examples": [
     {
@@ -78,7 +80,7 @@ leetcode-prototype/
 | CPU | 1 vCPU (любой) |
 | RAM | 512 MB |
 | Disk | 100 MB |
-| OS | Любая с Python 3.10+ |
+| OS | Любая с Python 3.9+ |
 | Сеть | Не требуется |
 
 ### Критерии завершения этапа

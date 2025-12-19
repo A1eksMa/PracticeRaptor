@@ -1,496 +1,504 @@
-# Roadmap: Этапы развития LeetCode Bot
+# PracticeRaptor: Roadmap
 
-## Этап 1: Прототипирование
+## Видение проекта
 
-### Цель этапа
-Проверить концепцию и отладить ядро системы — логику выполнения пользовательского кода и проверки решений. Минимальный работающий продукт без внешних зависимостей.
+**PracticeRaptor** — платформа для отработки практических навыков программирования через короткие алгоритмические задания. Быстрые, хваткие, точные упражнения для развития coding skills.
 
-### Технологический стек
-| Компонент | Технология |
-|-----------|------------|
-| Язык | Python 3.10+ |
-| Хранение данных | JSON-файлы |
-| Интерфейс | CLI (командная строка) |
-| Зависимости | Минимум: только стандартная библиотека Python |
-
-### Основная функциональность
-- Загрузка задачи из JSON-файла
-- Отображение условия задачи и примеров
-- Приём кода решения от пользователя
-- Выполнение кода против набора тестов
-- Вывод результата: успех / ошибка с описанием
-
-**Что НЕ входит в этап:**
-- Telegram-бот
-- База данных
-- Учёт и статистика пользователей
-- Фильтрация задач по темам/сложности
-- Подсказки и теория
-- Режим быстрой проверки (только полная отправка)
-
-### Архитектура и структура проекта
+### Стратегия развития
 
 ```
-leetcode-prototype/
-├── main.py                 # Точка входа, CLI интерфейс
-├── task_loader.py          # Загрузка задач из JSON
-├── executor.py             # Выполнение пользовательского кода
-├── validator.py            # Сравнение результатов с ожидаемыми
-├── selector.py             # Выбор задачи из списка
-├── tasks/
-│   ├── 1_two_sum.json        # Задача 1
-│   ├── 2_reverse_string.json # Задача 2
-│   └── 3_palindrome.json     # Задача 3
-└── README.md
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            КЛИЕНТЫ                                       │
+├──────────────┬──────────────┬──────────────┬───────────────────────────┤
+│     CLI      │   Telegram   │  Web-сайт    │   Embeddable Widget       │
+│  (standalone │     Bot      │              │  (для учебных платформ)   │
+│  open-source)│              │              │                           │
+└──────────────┴───────┬──────┴───────┬──────┴─────────────┬─────────────┘
+                       │              │                    │
+                       └──────────────┴────────────────────┘
+                                      │
+                       ┌──────────────▼──────────────┐
+                       │      ЕДИНОЕ ЯДРО (Core)     │
+                       │                             │
+                       │  • Domain Models            │
+                       │  • Business Logic           │
+                       │  • Repository Interfaces    │
+                       │  • Executor Interfaces      │
+                       └──────────────┬──────────────┘
+                                      │
+                       ┌──────────────▼──────────────┐
+                       │         АДАПТЕРЫ            │
+                       ├─────────────────────────────┤
+                       │ Storage:    JSON│SQLite│PG  │
+                       │ Executor:   Local│Docker│API│
+                       │ Auth:       Anon│Token│OAuth│
+                       └─────────────────────────────┘
 ```
 
-### Формат JSON-файла задачи
-```json
+### Модели распространения
+
+| Интерфейс | Модель | Описание |
+|-----------|--------|----------|
+| CLI | Open-source | Бесплатно, standalone, для гиков |
+| Telegram Bot | Freemium | Бесплатные базовые задачи + подписка |
+| Web | Freemium | Бесплатные базовые задачи + подписка |
+| Widget | B2B | Интеграция в учебные платформы |
+
+---
+
+## Архитектурные принципы
+
+1. **Ядро независимо от интерфейса** — вся бизнес-логика в core, клиенты — тонкие обёртки
+2. **Переключаемые хранилища** — JSON → SQLite → PostgreSQL через конфигурацию
+3. **Изолированное выполнение** — executor как отдельный сервис (local/docker/remote)
+4. **Функциональный паритет** — все интерфейсы равноправны, CLI не урезан
+5. **Интерфейс-специфичные адаптации** — отступы для TG, vim для CLI — в адаптерах
+
+---
+
+## Этапы развития
+
+```
+Stage 1     [DONE]     CLI Prototype — прототип, проверка концепции
+    │
+Stage 1.5  [NEXT]     Core Extraction — выделение ядра, архитектура Ports & Adapters
+    │
+Stage 1.6             CLI Enhancement — доработка CLI до полноценного продукта
+    │
+Stage 1.7             Storage Abstraction — JSON ↔ SQLite ↔ PostgreSQL
+    │
+Stage 1.8             Execution Service — executor как микросервис
+    │
+Stage 2               Telegram Bot — первый внешний клиент
+    │
+Stage 3               Web Interface — сайт + embeddable widget
+    │
+Stage 4               Production & Scale — мониторинг, billing, масштабирование
+```
+
+---
+
+## Stage 1: CLI Prototype [DONE]
+
+**Статус:** Завершён
+
+**Цель:** Проверить концепцию, отладить ядро логики выполнения и проверки кода.
+
+**Результат:**
+- Загрузка задач из JSON
+- Интерактивный выбор задач
+- Многострочный ввод кода с командами (!hint, !reset, !cancel)
+- Безопасное выполнение в sandbox (multiprocessing)
+- Валидация синтаксиса и тестирование
+- Отображение результатов
+
+**Документация:** [proposals/stage1/](./stage1/)
+
+---
+
+## Stage 1.5: Core Extraction [NEXT]
+
+**Цель:** Рефакторинг в архитектуру Ports & Adapters. Отделение ядра от CLI.
+
+### Структура после рефакторинга
+
+```
+practiceraptor/
+├── core/
+│   ├── domain/
+│   │   ├── models.py           # Task, User, Solution, Progress, TestResult
+│   │   └── services.py         # TaskService, ExecutionService, ProgressService
+│   │
+│   ├── ports/                  # Интерфейсы (абстракции)
+│   │   ├── repositories.py     # ITaskRepository, IUserRepository, IProgressRepository
+│   │   ├── executors.py        # ICodeExecutor
+│   │   └── auth.py             # IAuthProvider
+│   │
+│   └── adapters/               # Реализации
+│       ├── storage/
+│       │   └── json_repository.py
+│       ├── executors/
+│       │   └── local_executor.py
+│       └── auth/
+│           └── anonymous_auth.py
+│
+├── clients/
+│   └── cli/                    # Текущий CLI, рефакторинг
+│       ├── main.py
+│       ├── presenter.py
+│       ├── input_handler.py
+│       └── ...
+│
+├── data/
+│   └── tasks/                  # JSON-файлы задач
+│
+└── tests/
+```
+
+### Модель данных (Domain Models)
+
+```python
+@dataclass
+class User:
+    id: str
+    name: str | None
+    settings: UserSettings
+    created_at: datetime
+
+@dataclass
+class Progress:
+    user_id: str
+    task_id: int
+    status: ProgressStatus  # not_started, in_progress, solved
+    attempts: int
+    best_time_ms: int | None
+    solved_at: datetime | None
+
+@dataclass
+class Solution:
+    id: str
+    user_id: str
+    task_id: int
+    code: str
+    language: str
+    status: SolutionStatus  # accepted, wrong_answer, error, timeout
+    execution_time_ms: int | None
+    created_at: datetime
+
+@dataclass
+class Achievement:
+    id: str
+    name: str
+    description: str
+    icon: str
+    condition: str  # e.g., "solved_count >= 10"
+```
+
+### Критерии готовности
+
+- [ ] CLI работает идентично текущему, но через абстракции
+- [ ] Все зависимости инвертированы (DI)
+- [ ] Domain models определены полностью
+- [ ] Тесты для core проходят
+- [ ] Документация обновлена
+
+**Документация:** [proposals/stage1.5/](./stage1.5/)
+
+---
+
+## Stage 1.6: CLI Enhancement
+
+**Цель:** Доработка CLI до полноценного продукта.
+
+### Планируемые фичи
+
+**Работа с задачами:**
+- Фильтрация по тегам и сложности
+- Поиск задач по названию
+- Открытие в редакторе (vim/nano/code)
+- Загрузка решения из файла (улучшенная)
+
+**Пользовательский опыт:**
+- Локальная история решений
+- Прогресс и статистика (решено X из Y)
+- Конфигурационный файл (~/.practriceraptor.yaml)
+- Цветовые темы
+
+**Расширенные возможности:**
+- Режим соревнования (таймер)
+- Сравнение с эталонным решением
+- Экспорт статистики
+
+### Критерии готовности
+
+- [ ] Все запланированные фичи реализованы
+- [ ] Документация пользователя обновлена
+- [ ] Конфигурация через YAML
+
+---
+
+## Stage 1.7: Storage Abstraction
+
+**Цель:** Поддержка нескольких бэкендов хранения с переключением через конфигурацию.
+
+### Конфигурация
+
+```yaml
+# ~/.practriceraptor.yaml
+storage:
+  type: sqlite  # json | sqlite | postgresql
+
+  # Для json
+  json:
+    tasks_dir: ./data/tasks
+    users_dir: ./data/users
+
+  # Для sqlite
+  sqlite:
+    path: ./data/practriceraptor.db
+
+  # Для postgresql
+  postgresql:
+    host: localhost
+    port: 5432
+    database: practriceraptor
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+```
+
+### Репозитории
+
+| Interface | JSON | SQLite | PostgreSQL |
+|-----------|------|--------|------------|
+| ITaskRepository | ✓ | ✓ | ✓ |
+| IUserRepository | ✓ | ✓ | ✓ |
+| IProgressRepository | ✓ | ✓ | ✓ |
+| ISolutionRepository | ✓ | ✓ | ✓ |
+
+### Миграции
+
+- JSON → SQLite: скрипт импорта
+- SQLite → PostgreSQL: Alembic миграции
+
+### Критерии готовности
+
+- [ ] Все три бэкенда работают
+- [ ] Переключение через конфигурацию
+- [ ] Миграции данных работают
+- [ ] Тесты для каждого бэкенда
+
+---
+
+## Stage 1.8: Execution Service
+
+**Цель:** Выделение executor в отдельный микросервис.
+
+### Архитектура
+
+```
+┌─────────────┐         ┌──────────────────┐
+│    Core     │  HTTP   │ Execution Service│
+│  (клиент)   │ ──────► │   (FastAPI)      │
+└─────────────┘         └────────┬─────────┘
+                                 │
+                    ┌────────────┼────────────┐
+                    ▼            ▼            ▼
+              ┌──────────┐ ┌──────────┐ ┌──────────┐
+              │  Python  │ │   Go     │ │  Java    │
+              │ Executor │ │ Executor │ │ Executor │
+              └──────────┘ └──────────┘ └──────────┘
+```
+
+### Режимы работы
+
+```yaml
+executor:
+  type: local    # local | service
+
+  # Для local (текущий multiprocessing)
+  local:
+    timeout_sec: 5
+
+  # Для service (HTTP API)
+  service:
+    url: http://localhost:8080
+    api_key: ${EXECUTOR_API_KEY}
+```
+
+### API Execution Service
+
+```
+POST /execute
 {
-  "id": 1,
-  "title": "Two Sum",
-  "difficulty": "easy",
-  "tags": ["array", "hash-table"],
-  "description": "Дан массив целых чисел nums и целое число target. Верните индексы двух чисел, сумма которых равна target.\n\nМожно предположить, что каждый вход имеет ровно одно решение, и вы не можете использовать один и тот же элемент дважды.\n\nВернуть ответ можно в любом порядке.",
-  "examples": [
-    {
-      "input": {"nums": [2, 7, 11, 15], "target": 9},
-      "output": [0, 1],
-      "explanation": "nums[0] + nums[1] = 2 + 7 = 9, поэтому возвращаем [0, 1]"
-    },
-    {
-      "input": {"nums": [3, 2, 4], "target": 6},
-      "output": [1, 2],
-      "explanation": "nums[1] + nums[2] = 2 + 4 = 6, поэтому возвращаем [1, 2]"
-    },
-    {
-      "input": {"nums": [3, 3], "target": 6},
-      "output": [0, 1],
-      "explanation": "nums[0] + nums[1] = 3 + 3 = 6, поэтому возвращаем [0, 1]"
-    }
-  ],
-  "test_cases": [
-    {"input": {"nums": [2, 7, 11, 15], "target": 9}, "expected": [0, 1], "description": "базовый случай из примера"},
-    {"input": {"nums": [3, 2, 4], "target": 6}, "expected": [1, 2], "description": "ответ не в начале массива"},
-    {"input": {"nums": [3, 3], "target": 6}, "expected": [0, 1], "description": "одинаковые элементы"},
-    {"input": {"nums": [1, 5, 3, 7, 2], "target": 8}, "expected": [1, 2], "description": "несколько элементов"},
-    {"input": {"nums": [-1, -2, -3, -4, -5], "target": -8}, "expected": [2, 4], "description": "отрицательные числа"},
-    {"input": {"nums": [0, 4, 3, 0], "target": 0}, "expected": [0, 3], "description": "нули в массиве"},
-    {"input": {"nums": [1, 2], "target": 3}, "expected": [0, 1], "description": "минимальный массив"}
-  ],
-  "python3": {
-    "function_signature": "def two_sum(nums: list[int], target: int) -> list[int]:",
-    "solutions": [
-      {
-        "name": "Brute Force",
-        "complexity": "O(n²)",
-        "code": "def two_sum(nums: list[int], target: int) -> list[int]:\n    for i in range(len(nums)):\n        for j in range(i + 1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return []"
-      },
-      {
-        "name": "Hash Map (один проход)",
-        "complexity": "O(n)",
-        "code": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []"
-      },
-      {
-        "name": "Hash Map (два прохода)",
-        "complexity": "O(n)",
-        "code": "def two_sum(nums: list[int], target: int) -> list[int]:\n    num_to_index = {num: i for i, num in enumerate(nums)}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_to_index and num_to_index[complement] != i:\n            return [i, num_to_index[complement]]\n    return []"
-      }
-    ]
-  }
+  "code": "def solution(...)...",
+  "language": "python",
+  "test_cases": [...],
+  "timeout_sec": 5,
+  "memory_limit_mb": 256
+}
+
+Response:
+{
+  "status": "accepted",
+  "results": [...],
+  "execution_time_ms": 45,
+  "memory_used_kb": 14200
 }
 ```
 
-### Применяемые решения
-- **Выполнение кода**: `exec()` с ограниченным `globals`/`locals` контекстом
-- **Базовая защита**: таймаут через `signal.alarm()` (Unix) или `threading.Timer`
-- **Сравнение результатов**: прямое сравнение Python-объектов
-- **Вывод ошибок**: перехват исключений с traceback
+### Изоляция
 
-### Технические требования
-| Параметр | Требование |
-|----------|------------|
-| CPU | 1 vCPU (любой) |
-| RAM | 512 MB |
-| Disk | 100 MB |
-| OS | Любая с Python 3.9+ |
-| Сеть | Не требуется |
+- **Развёртывание на одном сервере:** Docker контейнеры
+- **Развёртывание на разных серверах:** отдельный инстанс для executor
 
-### Критерии завершения этапа
-- [ ] Загрузка задачи из JSON работает корректно
-- [ ] Код пользователя выполняется в изолированном контексте
-- [ ] Тесты прогоняются последовательно, останавливаются на первой ошибке
-- [ ] Корректно обрабатываются: синтаксические ошибки, runtime ошибки, таймауты
-- [ ] Результат выводится с понятным описанием
+### Критерии готовности
+
+- [ ] Execution Service работает как отдельное приложение
+- [ ] API документирован (OpenAPI)
+- [ ] Docker-образ для execution service
+- [ ] Переключение local/service через конфигурацию
 
 ---
 
-## Этап 2: Развитие и масштабирование
+## Stage 2: Telegram Bot
 
-### Цель этапа
-Превратить прототип в полноценный продукт с пользовательским интерфейсом (Telegram-бот), базой данных и расширенной функциональностью.
+**Цель:** Первый внешний клиент, подключённый к ядру через API.
 
-### Технологический стек
-| Компонент | Технология |
-|-----------|------------|
-| Язык | Python 3.11+ |
-| Telegram Bot | aiogram 3.x (асинхронный) |
-| База данных | SQLite 3 |
-| ORM | SQLAlchemy 2.0 (async) + aiosqlite |
-| API | FastAPI (для Code Runner) |
-| HTTP Client | httpx (async) |
-| Валидация | Pydantic v2 |
-
-### Основная функциональность
-- **Telegram-бот** как основной интерфейс
-- **Настройки пользователя**: выбор тематики и сложности
-- **Фильтрация задач**: по теме, сложности
-- **Список задач**: навигация вперед/назад
-- **Рандомная задача**: быстрый старт с учётом фильтров
-- **Режим решения**:
-  - Просмотр условия и примеров
-  - Быстрая проверка на примерах (кнопка "Проверить")
-  - Полная проверка (кнопка "Отправить")
-- **Подсказки**: команда `/help` с теорией
-- **Базовая статистика**: какие задачи решены пользователем
-- **Хранение решений**: история submissions
-
-### Архитектура и структура проекта
+### Архитектура
 
 ```
-leetcode-bot/
-├── docker-compose.yml
-├── bot/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── src/
-│   │   ├── __init__.py
-│   │   ├── main.py              # Точка входа бота
-│   │   ├── config.py            # Конфигурация
-│   │   ├── handlers/
-│   │   │   ├── __init__.py
-│   │   │   ├── start.py         # /start, приветствие
-│   │   │   ├── settings.py      # Настройки фильтров
-│   │   │   ├── tasks.py         # Список задач, навигация
-│   │   │   └── solve.py         # Процесс решения
-│   │   ├── keyboards/
-│   │   │   ├── inline.py        # Inline-кнопки
-│   │   │   └── reply.py         # Reply-клавиатуры
-│   │   ├── states/
-│   │   │   └── solving.py       # FSM состояния решения
-│   │   ├── services/
-│   │   │   ├── task_service.py  # Работа с задачами
-│   │   │   └── runner_client.py # Клиент к Runner API
-│   │   ├── db/
-│   │   │   ├── database.py      # Подключение к SQLite
-│   │   │   ├── models.py        # SQLAlchemy модели
-│   │   │   └── repositories.py  # CRUD операции
-│   │   └── utils/
-│   └── tests/
-├── runner/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── src/
-│   │   ├── main.py              # FastAPI приложение
-│   │   ├── executor.py          # Выполнение кода
-│   │   ├── schemas.py           # Pydantic схемы
-│   │   └── sandbox.py           # Изоляция (subprocess + limits)
-│   └── tests/
-├── data/
-│   ├── tasks.db                 # SQLite база
-│   └── seed/
-│       └── tasks.json           # Начальные данные для импорта
-└── scripts/
-    └── seed_db.py               # Скрипт заполнения БД
+┌─────────────────┐     ┌─────────────────┐
+│   Telegram      │     │   Bot Service   │
+│   Users         │◄───►│   (aiogram 3.x) │
+└─────────────────┘     └────────┬────────┘
+                                 │
+                        ┌────────▼────────┐
+                        │   Core API      │
+                        │   (FastAPI)     │
+                        └────────┬────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              ▼                  ▼                  ▼
+      ┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+      │   Storage     │  │   Executor    │  │     Auth      │
+      │   (PostgreSQL)│  │   Service     │  │   Service     │
+      └───────────────┘  └───────────────┘  └───────────────┘
 ```
 
-### Схема базы данных (SQLite)
+### Функциональность
 
-```sql
--- Темы задач
-CREATE TABLE topics (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    slug TEXT UNIQUE NOT NULL
-);
+- Регистрация пользователей (Telegram ID)
+- Выбор задач с фильтрацией
+- Решение задач через чат
+- Статистика и прогресс
+- Подсказки и эталонные решения
+- Freemium модель (базовые задачи бесплатно)
 
--- Задачи
-CREATE TABLE tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    slug TEXT UNIQUE NOT NULL,
-    description TEXT NOT NULL,
-    difficulty TEXT NOT NULL CHECK (difficulty IN ('easy', 'medium', 'hard')),
-    function_signature TEXT NOT NULL,
-    examples TEXT NOT NULL,  -- JSON
-    hints TEXT,              -- JSON array
-    is_active INTEGER DEFAULT 1
-);
+### Адаптации для мобильных устройств
 
--- Связь задач и тем
-CREATE TABLE task_topics (
-    task_id INTEGER REFERENCES tasks(id),
-    topic_id INTEGER REFERENCES topics(id),
-    PRIMARY KEY (task_id, topic_id)
-);
+- Код без начальных отступов (добавляются автоматически)
+- Inline-клавиатуры для навигации
+- Компактное отображение результатов
 
--- Тест-кейсы
-CREATE TABLE test_cases (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    task_id INTEGER REFERENCES tasks(id),
-    input TEXT NOT NULL,      -- JSON
-    expected TEXT NOT NULL,   -- JSON
-    is_example INTEGER DEFAULT 0,
-    description TEXT
-);
+### Технологии
 
--- Пользователи
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    telegram_id INTEGER UNIQUE NOT NULL,
-    username TEXT,
-    settings TEXT DEFAULT '{}',  -- JSON
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
+- aiogram 3.x (async)
+- FastAPI для Core API
+- PostgreSQL (через Stage 1.7)
+- Redis для сессий
 
--- Решения
-CREATE TABLE submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER REFERENCES users(id),
-    task_id INTEGER REFERENCES tasks(id),
-    code TEXT NOT NULL,
-    status TEXT NOT NULL,
-    execution_time_ms INTEGER,
-    error_message TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-```
+### Критерии готовности
 
-### Применяемые решения
-- **Асинхронность**: aiogram 3.x + aiosqlite для неблокирующей работы
-- **FSM**: Finite State Machine для управления состоянием диалога (выбор фильтров → список → решение)
-- **Code Runner**: отдельный FastAPI сервис, изоляция через subprocess с ресурсными лимитами
-- **Контейнеризация**: Docker Compose для локальной разработки
-- **Миграции**: Alembic для управления схемой БД
-
-### Технические требования
-| Параметр | Требование |
-|----------|------------|
-| CPU | 2 vCPU |
-| RAM | 2 GB |
-| Disk | 20 GB SSD |
-| OS | Ubuntu 22.04 / Debian 12 |
-| Docker | 24+ |
-| Сеть | Доступ к Telegram API |
-
-### Критерии завершения этапа
-- [ ] Telegram-бот отвечает на команды и ведёт диалог
-- [ ] Работает фильтрация и навигация по задачам
-- [ ] Пользователь может решать задачи через бота
-- [ ] Решения сохраняются в SQLite
-- [ ] Базовая статистика пользователя доступна
-- [ ] Проект запускается через `docker-compose up`
+- [ ] Бот работает в Telegram
+- [ ] Пользователи могут решать задачи
+- [ ] Статистика сохраняется
+- [ ] Docker Compose для развёртывания
 
 ---
 
-## Этап 3: Техническая зрелость
+## Stage 3: Web Interface
 
-### Цель этапа
-Подготовить систему к production-нагрузкам: надёжность, масштабируемость, безопасность, мониторинг. Полная реализация функциональных требований.
+**Цель:** Web-сайт и embeddable widget для учебных платформ.
 
-### Технологический стек
-| Компонент | Технология |
-|-----------|------------|
-| Язык | Python 3.11+ |
-| Telegram Bot | aiogram 3.x |
-| API Gateway | FastAPI |
-| База данных | PostgreSQL 15+ (отдельный сервер) |
-| Кэш/Очереди | Redis 7+ |
-| ORM | SQLAlchemy 2.0 + asyncpg |
-| Task Queue | arq / Celery |
-| Контейнеризация | Docker, Docker Compose |
-| CI/CD | GitHub Actions |
-| Reverse Proxy | Nginx |
-| Мониторинг | Prometheus + Grafana |
-| Логирование | Структурированные логи (JSON), Loki (опционально) |
+### Компоненты
 
-### Основная функциональность
-Всё из этапа 2, плюс:
+1. **Web-сайт** — полнофункциональный интерфейс в браузере
+2. **Widget** — встраиваемый iframe для учебных платформ
 
-- **Регистрация и авторизация** пользователей
-- **Расширенная статистика**: решённые задачи, процент успеха, время, прогресс
-- **Фильтр "только нерешённые"** для зарегистрированных
-- **Просмотр решений** других пользователей
-- **Добавление тест-кейсов** пользователями
-- **Поддержка нескольких языков** программирования (Go, Java, etc.)
-- **Rate limiting** и защита от злоупотреблений
-- **Webhooks** вместо polling для бота
-- **Health checks** и graceful shutdown
-- **Автоматический деплой** при пуше в main
+### Widget Integration
 
-### Архитектура и структура проекта
-
-```
-                    ┌─────────────────────────────────────────┐
-                    │              Load Balancer              │
-                    │                (Nginx)                  │
-                    └──────────────────┬──────────────────────┘
-                                       │
-            ┌──────────────────────────┼──────────────────────────┐
-            │                          │                          │
-            ▼                          ▼                          ▼
-    ┌───────────────┐         ┌───────────────┐          ┌───────────────┐
-    │  Bot Service  │         │  Bot Service  │          │  API Gateway  │
-    │   (webhook)   │         │   (webhook)   │          │   (FastAPI)   │
-    └───────┬───────┘         └───────┬───────┘          └───────┬───────┘
-            │                         │                          │
-            └─────────────────────────┼──────────────────────────┘
-                                      │
-                                      ▼
-                             ┌───────────────┐
-                             │     Redis     │
-                             │ (cache/queue) │
-                             └───────┬───────┘
-                                     │
-                    ┌────────────────┼────────────────┐
-                    │                │                │
-                    ▼                ▼                ▼
-           ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-           │ Runner Worker│ │ Runner Worker│ │ Runner Worker│
-           │   (Python)   │ │    (Go)      │ │   (Java)     │
-           └──────────────┘ └──────────────┘ └──────────────┘
-                    │                │                │
-                    └────────────────┼────────────────┘
-                                     │
-                                     ▼
-                            ┌───────────────┐
-                            │  PostgreSQL   │
-                            │   (Primary)   │
-                            └───────────────┘
+```html
+<!-- На учебной платформе -->
+<iframe
+  src="https://practice.raptor/embed/task/42"
+  data-user-token="..."
+></iframe>
 ```
 
-```
-leetcode-bot/
-├── docker-compose.yml
-├── docker-compose.prod.yml
-├── nginx/
-│   └── nginx.conf
-├── .github/
-│   └── workflows/
-│       ├── ci.yml
-│       └── deploy.yml
-├── bot/
-│   ├── Dockerfile
-│   └── src/
-│       ├── main.py
-│       ├── config.py
-│       ├── handlers/
-│       ├── keyboards/
-│       ├── states/
-│       ├── services/
-│       ├── middlewares/
-│       │   ├── auth.py
-│       │   ├── rate_limit.py
-│       │   └── logging.py
-│       └── db/
-├── api/
-│   ├── Dockerfile
-│   └── src/
-│       ├── main.py
-│       ├── routers/
-│       │   ├── tasks.py
-│       │   ├── submissions.py
-│       │   ├── users.py
-│       │   └── solutions.py
-│       ├── services/
-│       ├── schemas/
-│       └── db/
-│           ├── database.py
-│           ├── models.py
-│           └── migrations/
-├── runner/
-│   ├── Dockerfile
-│   ├── Dockerfile.python
-│   ├── Dockerfile.go
-│   ├── Dockerfile.java
-│   └── src/
-│       ├── worker.py
-│       ├── executors/
-│       │   ├── base.py
-│       │   ├── python_executor.py
-│       │   ├── go_executor.py
-│       │   └── java_executor.py
-│       └── sandbox/
-├── monitoring/
-│   ├── prometheus.yml
-│   └── grafana/
-│       └── dashboards/
-└── scripts/
-    ├── deploy.sh
-    └── backup.sh
-```
+### SSO между платформами
 
-### Применяемые решения
-- **Горизонтальное масштабирование**: несколько инстансов бота за Nginx
-- **Webhook mode**: вместо polling для снижения нагрузки
-- **Очередь задач**: Redis + arq для асинхронного выполнения кода
-- **Docker sandbox**: изолированные контейнеры для каждого языка
-- **CI/CD**: автотесты → сборка образов → деплой через SSH
-- **Мониторинг**: Prometheus метрики, Grafana дашборды
-- **Graceful shutdown**: корректное завершение при деплое
+- Единая система авторизации
+- Пользователь учебной платформы = пользователь PracticeRaptor
+- Общий прогресс и статистика
+
+### Технологии
+
+- Frontend: React/Vue или HTMX (TBD)
+- API: тот же Core API
+- Auth: OAuth2 / JWT
+
+---
+
+## Stage 4: Production & Scale
+
+**Цель:** Готовность к production-нагрузкам и монетизации.
+
+### Инфраструктура
+
+- Load Balancer (Nginx)
+- Горизонтальное масштабирование
+- PostgreSQL репликация
+- Redis кластер
+
+### Мониторинг
+
+- Prometheus + Grafana
+- Структурированные логи
+- Алерты
+
+### Billing
+
+- Stripe/ЮKassa интеграция
+- Подписки и разовые платежи
+- Управление доступом к premium-контенту
 
 ### Безопасность
-- **Code sandbox**: Docker с ограничениями (CPU, RAM, время, сеть отключена)
-- **Rate limiting**: per-user лимиты на submissions
-- **Secrets**: все ключи в переменных окружения / Docker secrets
-- **HTTPS**: SSL termination на Nginx
-- **Валидация**: Pydantic на всех входных данных
 
-### Технические требования
-
-**Application Server:**
-| Параметр | Минимум | Рекомендуется |
-|----------|---------|---------------|
-| CPU | 2 vCPU | 4 vCPU |
-| RAM | 4 GB | 8 GB |
-| Disk | 40 GB SSD | 80 GB SSD |
-
-**Database Server:**
-| Параметр | Минимум | Рекомендуется |
-|----------|---------|---------------|
-| CPU | 2 vCPU | 4 vCPU |
-| RAM | 4 GB | 8 GB |
-| Disk | 50 GB SSD | 100 GB SSD |
-
-**Общие требования:**
-- OS: Ubuntu 22.04 LTS / Debian 12
-- Docker 24+
-- PostgreSQL 15+
-- Redis 7+
-- Сеть: 100 Mbps+, статический IP
-
-### Критерии завершения этапа
-- [ ] PostgreSQL на отдельном сервере, миграции работают
-- [ ] Redis для кэширования и очереди задач
-- [ ] CI/CD пайплайн: push → тесты → деплой
-- [ ] Мониторинг и алерты настроены
-- [ ] Поддержка минимум 2 языков программирования
-- [ ] Rate limiting и защита от злоупотреблений
-- [ ] Документация API (OpenAPI/Swagger)
-- [ ] Uptime 99%+ при нормальной нагрузке
+- Rate limiting
+- DDoS protection
+- Secrets management
+- Regular backups
 
 ---
 
-## Сводная таблица этапов
+## Сводная таблица
 
-| Характеристика | Этап 1 | Этап 2 | Этап 3 |
-|----------------|--------|--------|--------|
-| **Интерфейс** | CLI | Telegram Bot | Telegram Bot |
-| **База данных** | JSON-файлы | SQLite | PostgreSQL |
-| **Кэш** | — | — | Redis |
-| **Контейнеры** | — | Docker Compose | Docker + CI/CD |
-| **Языки задач** | Python | Python | Python, Go, Java |
-| **Пользователи** | — | Базовый учёт | Полная статистика |
-| **Фильтрация** | — | Да | Да + "нерешённые" |
-| **Масштабирование** | — | Вертикальное | Горизонтальное |
-| **Сервер** | Любой ПК | 2 vCPU / 2 GB | 4+ vCPU / 8+ GB |
+| Stage | Интерфейс | Хранилище | Executor | Пользователи |
+|-------|-----------|-----------|----------|--------------|
+| 1 | CLI | JSON | Local | — |
+| 1.5 | CLI | JSON | Local (abstracted) | Модель |
+| 1.6 | CLI+ | JSON | Local | Локальные |
+| 1.7 | CLI+ | JSON/SQLite/PG | Local | Локальные |
+| 1.8 | CLI+ | JSON/SQLite/PG | Local/Service | Локальные |
+| 2 | CLI+, TG | PostgreSQL | Service | Registered |
+| 3 | CLI+, TG, Web | PostgreSQL | Service | Registered |
+| 4 | All | PostgreSQL (scaled) | Service (scaled) | Registered + Paid |
+
+---
+
+## Технические требования по этапам
+
+### Stage 1.5–1.8 (Development)
+
+| Параметр | Значение |
+|----------|----------|
+| CPU | 1 vCPU |
+| RAM | 1 GB |
+| Disk | 10 GB |
+| OS | Debian 12 |
+
+### Stage 2 (Telegram Bot MVP)
+
+| Параметр | Минимум | Рекомендуется |
+|----------|---------|---------------|
+| CPU | 2 vCPU | 4 vCPU |
+| RAM | 2 GB | 4 GB |
+| Disk | 20 GB | 40 GB |
+
+### Stage 3–4 (Production)
+
+| Компонент | CPU | RAM | Disk |
+|-----------|-----|-----|------|
+| App Server | 4+ vCPU | 8+ GB | 40 GB |
+| DB Server | 4+ vCPU | 8+ GB | 100 GB |
+| Executor | 2+ vCPU | 4+ GB | 20 GB |

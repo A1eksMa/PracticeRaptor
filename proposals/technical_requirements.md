@@ -1,514 +1,726 @@
-# Технические требования к LeetCode Telegram Bot
+# PracticeRaptor: Технические требования
 
-## 1. Архитектура системы
+## 1. Архитектурные принципы
 
-### 1.1. Общая архитектура
-Система построена на микросервисной архитектуре и состоит из следующих компонентов:
+### 1.1. Hexagonal Architecture (Ports & Adapters)
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Telegram      │     │   Bot Service   │     │   PostgreSQL    │
-│   Users         │◄───►│   (aiogram)     │◄───►│   Database      │
-└─────────────────┘     └────────┬────────┘     └─────────────────┘
-                                 │
-                                 ▼
-                        ┌─────────────────┐
-                        │   API Gateway   │
-                        │   (FastAPI)     │
-                        └────────┬────────┘
-                                 │
-                    ┌────────────┼────────────┐
-                    ▼            ▼            ▼
-            ┌───────────┐ ┌───────────┐ ┌───────────┐
-            │  Python   │ │   Go      │ │   Java    │
-            │  Runner   │ │  Runner   │ │  Runner   │
-            │  (MVP)    │ │ (future)  │ │ (future)  │
-            └───────────┘ └───────────┘ └───────────┘
-```
-
-### 1.2. Компоненты системы
-
-| Компонент | Назначение | Технология |
-|-----------|------------|------------|
-| Bot Service | Telegram-интерфейс, обработка команд | Python 3.11+, aiogram 3.x |
-| API Gateway | Маршрутизация запросов, аутентификация | Python 3.11+, FastAPI |
-| Code Runner API | Выполнение пользовательского кода | FastAPI + Docker sandbox |
-| Database | Хранение задач, пользователей, решений | PostgreSQL 15+ |
-| Cache | Кэширование сессий и частых запросов | Redis |
-| Message Queue | Очередь задач на выполнение кода | Redis / RabbitMQ |
-
-## 2. Технологический стек
-
-### 2.1. Backend
-- **Язык**: Python 3.11+
-- **Telegram Bot Framework**: aiogram 3.x (асинхронный)
-- **Web Framework**: FastAPI
-- **ORM**: SQLAlchemy 2.0 (async) + Alembic (миграции)
-- **Валидация данных**: Pydantic v2
-- **HTTP Client**: httpx (async)
-
-### 2.2. База данных и кэширование
-- **Основная БД**: PostgreSQL 15+
-- **Кэш/Сессии**: Redis 7+
-- **Очередь задач**: Redis (через arq или Celery с Redis backend)
-
-### 2.3. Инфраструктура
-- **Контейнеризация**: Docker, Docker Compose
-- **CI/CD**: GitHub Actions
-- **Reverse Proxy**: Nginx (опционально, для production)
-- **Мониторинг**: Prometheus + Grafana (опционально)
-
-## 3. Структура проекта
+Система построена на принципе разделения ядра от внешних зависимостей:
 
 ```
-leetcode-bot/
-├── docker-compose.yml
-├── docker-compose.prod.yml
-├── .github/
-│   └── workflows/
-│       ├── ci.yml              # Линтинг, тесты
-│       └── deploy.yml          # Автодеплой
-├── bot/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── src/
-│   │   ├── __init__.py
-│   │   ├── main.py             # Точка входа
-│   │   ├── config.py           # Конфигурация
-│   │   ├── handlers/           # Обработчики команд
-│   │   │   ├── __init__.py
-│   │   │   ├── start.py
-│   │   │   ├── tasks.py
-│   │   │   ├── solutions.py
-│   │   │   └── settings.py
-│   │   ├── keyboards/          # Inline и reply клавиатуры
-│   │   ├── states/             # FSM состояния
-│   │   ├── middlewares/        # Middleware (логирование, авторизация)
-│   │   ├── services/           # Бизнес-логика, API клиенты
-│   │   └── utils/
-│   └── tests/
-├── api/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── src/
-│   │   ├── __init__.py
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CLIENTS LAYER                                   │
+├─────────────────┬─────────────────┬─────────────────┬───────────────────────┤
+│      CLI        │  Telegram Bot   │    Web App      │       Widget          │
+└────────┬────────┴────────┬────────┴────────┬────────┴───────────┬───────────┘
+         │                 │                 │                    │
+         └─────────────────┴────────┬────────┴────────────────────┘
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              API LAYER                                       │
+│                           FastAPI Gateway                                    │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CORE LAYER                                      │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │  DOMAIN: Models (frozen), Enums, Errors, Result[T, E]                 │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │  PORTS: Protocols (IProblemRepository, ICodeExecutor, IAuthProvider)  │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │  SERVICES: Pure functions (validate, filter, calculate, transform)   │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │  USE CASES: Orchestration (side effects at boundaries)               │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────┬──────────────────────────────────────────┘
+                                   │
+         ┌─────────────────────────┼─────────────────────────┐
+         ▼                         ▼                         ▼
+┌─────────────────┐    ┌─────────────────────┐    ┌─────────────────────────┐
+│ STORAGE ADAPTERS│    │ EXECUTOR ADAPTERS   │    │    AUTH ADAPTERS        │
+│ JSON │ SQLite   │    │ Local │ Docker      │    │ Anonymous │ Token       │
+│ PostgreSQL      │    │ Remote API          │    │ OAuth                   │
+└─────────────────┘    └─────────────────────┘    └─────────────────────────┘
+```
+
+### 1.2. Функциональный стиль
+
+| Принцип | Реализация |
+|---------|------------|
+| Immutable data | `@dataclass(frozen=True)` для всех моделей |
+| Pure functions | Services без side effects |
+| Composition | Функции как строительные блоки |
+| Result type | `Ok[T] \| Err[E]` вместо exceptions |
+| Side effects | Только на границах (adapters) |
+
+### 1.3. Dependency Injection
+
+- Ручная реализация (без библиотек)
+- Container как frozen dataclass
+- Factory functions для создания зависимостей
+- Конфигурация через YAML
+
+### 1.4. Интерфейсы через Protocol
+
+```python
+from typing import Protocol
+
+class IProblemRepository(Protocol):
+    def get_by_id(self, problem_id: int) -> Result[Problem, NotFoundError]: ...
+    def get_all(self, filters: ProblemFilters) -> tuple[Problem, ...]: ...
+```
+
+- Структурная типизация (duck typing)
+- Не требует явного наследования
+- Совместимость проверяется статически (mypy)
+
+---
+
+## 2. Структура проекта
+
+```
+practiceraptor/
+│
+├── core/                           # Ядро (без внешних зависимостей)
+│   ├── domain/
+│   │   ├── models.py               # Problem, User, Submission, Draft, Progress
+│   │   ├── enums.py                # Difficulty, Language, Status
+│   │   ├── errors.py               # Типизированные ошибки
+│   │   └── result.py               # Result[T, E] = Ok[T] | Err[E]
+│   │
+│   ├── ports/                      # Интерфейсы (Protocols)
+│   │   ├── repositories.py         # IProblemRepository, IUserRepository, ...
+│   │   ├── executors.py            # ICodeExecutor
+│   │   └── auth.py                 # IAuthProvider
+│   │
+│   ├── services/                   # Чистые функции
+│   │   ├── problems.py             # get_problem, filter_problems
+│   │   ├── execution.py            # validate_code, run_tests
+│   │   ├── progress.py             # calculate_stats, update_progress
+│   │   └── drafts.py               # save_draft, load_draft
+│   │
+│   └── use_cases/                  # Композиция (orchestration)
+│       ├── solve_problem.py
+│       ├── submit_solution.py
+│       └── get_user_stats.py
+│
+├── adapters/                       # Реализации портов
+│   ├── storage/
+│   │   ├── json_repository.py      # JSON файлы
+│   │   ├── sqlite_repository.py    # SQLite
+│   │   └── postgres_repository.py  # PostgreSQL
+│   │
+│   ├── executors/
+│   │   ├── local_executor.py       # multiprocessing sandbox
+│   │   ├── docker_executor.py      # Docker контейнеры
+│   │   └── remote_executor.py      # HTTP API
+│   │
+│   └── auth/
+│       ├── anonymous_auth.py       # CLI (без авторизации)
+│       ├── telegram_auth.py        # Telegram ID
+│       └── token_auth.py           # JWT (Web/Widget)
+│
+├── di/                             # Dependency Injection
+│   ├── container.py                # Container dataclass
+│   ├── providers.py                # Factory functions
+│   └── config.py                   # Загрузка конфигурации
+│
+├── clients/                        # Интерфейсы пользователя
+│   ├── cli/
 │   │   ├── main.py
-│   │   ├── config.py
+│   │   ├── commands/
+│   │   ├── presenter.py
+│   │   └── editor.py
+│   │
+│   ├── api/                        # REST API (FastAPI)
+│   │   ├── main.py
 │   │   ├── routers/
-│   │   │   ├── __init__.py
-│   │   │   ├── tasks.py        # CRUD задач
-│   │   │   ├── submissions.py  # Отправка решений
-│   │   │   └── users.py        # Пользователи
-│   │   ├── models/             # SQLAlchemy модели
-│   │   ├── schemas/            # Pydantic схемы
-│   │   ├── services/
-│   │   └── db/
-│   │       ├── database.py
-│   │       └── migrations/
-│   └── tests/
-├── runner/
-│   ├── Dockerfile
-│   ├── Dockerfile.sandbox      # Изолированный образ для выполнения кода
-│   ├── requirements.txt
-│   ├── src/
+│   │   ├── schemas/
+│   │   └── dependencies.py
+│   │
+│   ├── telegram/
 │   │   ├── main.py
-│   │   ├── executor.py         # Логика выполнения кода
-│   │   └── sandbox.py          # Управление sandbox-контейнерами
-│   └── tests/
-└── shared/
-    └── schemas/                # Общие Pydantic схемы
+│   │   ├── handlers/
+│   │   ├── keyboards/
+│   │   └── states/
+│   │
+│   └── web/
+│       ├── main.py
+│       ├── templates/
+│       └── static/
+│
+├── tests/                          # Тесты (см. раздел 6)
+│
+├── data/                           # Данные (для JSON storage)
+│   ├── problems/
+│   ├── users/
+│   ├── submissions/
+│   └── drafts/
+│
+├── docker/                         # Docker конфигурации
+│   ├── Dockerfile.test
+│   ├── Dockerfile.cli
+│   ├── Dockerfile.api
+│   └── docker-compose.yml
+│
+├── config/                         # Конфигурационные файлы
+│   ├── config.example.yaml
+│   └── config.test.yaml
+│
+└── scripts/                        # Утилиты
+    ├── migrate.py
+    └── seed.py
 ```
 
-## 4. Схема базы данных
+---
 
-### 4.1. Основные таблицы
+## 3. Ключевые паттерны
 
-```sql
--- Пользователи
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    telegram_id BIGINT UNIQUE NOT NULL,
-    username VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    settings JSONB DEFAULT '{}'
-);
+### 3.1. Result Type
 
--- Темы задач
-CREATE TABLE topics (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    slug VARCHAR(100) UNIQUE NOT NULL
-);
+```python
+# core/domain/result.py
+from dataclasses import dataclass
+from typing import TypeVar, Generic, Callable
 
--- Задачи
-CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    description TEXT NOT NULL,
-    difficulty VARCHAR(20) NOT NULL CHECK (difficulty IN ('easy', 'medium', 'hard')),
-    function_signature TEXT NOT NULL,
-    examples JSONB NOT NULL,
-    hints TEXT[],
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
+T = TypeVar('T')
+E = TypeVar('E')
+U = TypeVar('U')
 
--- Связь задач и тем (M2M)
-CREATE TABLE task_topics (
-    task_id INT REFERENCES tasks(id) ON DELETE CASCADE,
-    topic_id INT REFERENCES topics(id) ON DELETE CASCADE,
-    PRIMARY KEY (task_id, topic_id)
-);
+@dataclass(frozen=True)
+class Ok(Generic[T]):
+    value: T
 
--- Тест-кейсы
-CREATE TABLE test_cases (
-    id SERIAL PRIMARY KEY,
-    task_id INT REFERENCES tasks(id) ON DELETE CASCADE,
-    input JSONB NOT NULL,
-    expected_output JSONB NOT NULL,
-    is_example BOOLEAN DEFAULT FALSE,  -- Показывается в условии
-    description TEXT,
-    order_index INT DEFAULT 0
-);
+    def is_ok(self) -> bool:
+        return True
 
--- Решения пользователей
-CREATE TABLE submissions (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    task_id INT REFERENCES tasks(id) ON DELETE CASCADE,
-    code TEXT NOT NULL,
-    language VARCHAR(20) NOT NULL DEFAULT 'python',
-    status VARCHAR(20) NOT NULL,  -- pending, running, accepted, wrong_answer, error, timeout
-    execution_time_ms INT,
-    memory_used_kb INT,
-    error_message TEXT,
-    failed_test_id INT REFERENCES test_cases(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+    def is_err(self) -> bool:
+        return False
 
--- Индексы
-CREATE INDEX idx_submissions_user_task ON submissions(user_id, task_id);
-CREATE INDEX idx_tasks_difficulty ON tasks(difficulty);
-CREATE INDEX idx_test_cases_task ON test_cases(task_id);
+    def map(self, fn: Callable[[T], U]) -> 'Ok[U]':
+        return Ok(fn(self.value))
+
+    def flat_map(self, fn: Callable[[T], 'Result[U, E]']) -> 'Result[U, E]':
+        return fn(self.value)
+
+    def unwrap(self) -> T:
+        return self.value
+
+    def unwrap_or(self, default: T) -> T:
+        return self.value
+
+@dataclass(frozen=True)
+class Err(Generic[E]):
+    error: E
+
+    def is_ok(self) -> bool:
+        return False
+
+    def is_err(self) -> bool:
+        return True
+
+    def map(self, fn: Callable) -> 'Err[E]':
+        return self
+
+    def flat_map(self, fn: Callable) -> 'Err[E]':
+        return self
+
+    def unwrap(self) -> None:
+        raise ValueError(f"Called unwrap on Err: {self.error}")
+
+    def unwrap_or(self, default: T) -> T:
+        return default
+
+Result = Ok[T] | Err[E]
 ```
 
-### 4.2. Настройки пользователя (JSONB)
-```json
-{
-  "preferred_language": "python",
-  "difficulty_filter": ["easy", "medium"],
-  "topic_filter": [1, 3, 5],
-  "notifications_enabled": true
-}
+### 3.2. Immutable Models
+
+```python
+# core/domain/models.py
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass(frozen=True)
+class Problem:
+    id: int
+    title: dict[str, str]           # i18n: {"en": "...", "ru": "..."}
+    description: dict[str, str]     # i18n
+    difficulty: Difficulty
+    tags: tuple[str, ...]           # Immutable collection
+    examples: tuple[Example, ...]
+    test_cases: tuple[TestCase, ...]
+    languages: tuple[LanguageSpec, ...]
+
+@dataclass(frozen=True)
+class Submission:
+    id: str
+    user_id: str
+    problem_id: int
+    code: str
+    language: Language
+    execution_time_ms: int
+    memory_used_kb: int
+    created_at: datetime
+
+@dataclass(frozen=True)
+class Draft:
+    user_id: str
+    problem_id: int
+    language: Language
+    code: str
+    updated_at: datetime
 ```
 
-## 5. API Specification
+### 3.3. Dependency Injection Container
 
-### 5.1. API Gateway Endpoints
+```python
+# di/container.py
+from dataclasses import dataclass
+from core.ports.repositories import IProblemRepository, IUserRepository
+from core.ports.executors import ICodeExecutor
+from core.ports.auth import IAuthProvider
 
-#### Задачи
-```
-GET    /api/v1/tasks                    # Список задач с фильтрацией
-GET    /api/v1/tasks/{task_id}          # Детали задачи
-GET    /api/v1/tasks/random             # Случайная задача по фильтрам
-GET    /api/v1/tasks/{task_id}/hints    # Подсказки к задаче
-GET    /api/v1/tasks/{task_id}/solutions # Решения других пользователей
-```
+@dataclass(frozen=True)
+class Container:
+    problem_repo: IProblemRepository
+    user_repo: IUserRepository
+    submission_repo: ISubmissionRepository
+    draft_repo: IDraftRepository
+    executor: ICodeExecutor
+    auth: IAuthProvider
 
-#### Решения
-```
-POST   /api/v1/submissions              # Отправить решение
-GET    /api/v1/submissions/{id}         # Статус решения
-POST   /api/v1/submissions/check        # Быстрая проверка на примерах
-```
+# di/providers.py
+def create_container(config: Config) -> Container:
+    """Factory для создания контейнера на основе конфигурации"""
 
-#### Пользователи
-```
-POST   /api/v1/users                    # Регистрация/обновление пользователя
-GET    /api/v1/users/{telegram_id}      # Данные пользователя
-GET    /api/v1/users/{telegram_id}/stats # Статистика пользователя
-PATCH  /api/v1/users/{telegram_id}/settings # Обновить настройки
-```
+    # Storage
+    problem_repo = _create_problem_repo(config.storage)
+    user_repo = _create_user_repo(config.storage)
+    submission_repo = _create_submission_repo(config.storage)
+    draft_repo = _create_draft_repo(config.storage)
 
-#### Справочники
-```
-GET    /api/v1/topics                   # Список тем
-GET    /api/v1/languages                # Поддерживаемые языки
-```
+    # Executor
+    executor = _create_executor(config.executor)
 
-### 5.2. Пример запроса/ответа
+    # Auth
+    auth = _create_auth(config.auth)
 
-**POST /api/v1/submissions**
-```json
-// Request
-{
-  "task_id": 42,
-  "user_telegram_id": 123456789,
-  "code": "def two_sum(nums, target):\n    ...",
-  "language": "python",
-  "mode": "submit"  // "check" для быстрой проверки
-}
+    return Container(
+        problem_repo=problem_repo,
+        user_repo=user_repo,
+        submission_repo=submission_repo,
+        draft_repo=draft_repo,
+        executor=executor,
+        auth=auth,
+    )
 
-// Response
-{
-  "submission_id": "abc123",
-  "status": "pending"
-}
-```
-
-**GET /api/v1/submissions/{id}** (после выполнения)
-```json
-{
-  "submission_id": "abc123",
-  "status": "accepted",
-  "execution_time_ms": 45,
-  "memory_used_kb": 14200,
-  "tests_passed": 15,
-  "tests_total": 15
-}
+def _create_problem_repo(storage_config: StorageConfig) -> IProblemRepository:
+    match storage_config.type:
+        case "json":
+            from adapters.storage.json_repository import JsonProblemRepository
+            return JsonProblemRepository(storage_config.json.path)
+        case "sqlite":
+            from adapters.storage.sqlite_repository import SqliteProblemRepository
+            return SqliteProblemRepository(storage_config.sqlite.path)
+        case "postgresql":
+            from adapters.storage.postgres_repository import PostgresProblemRepository
+            return PostgresProblemRepository(storage_config.postgresql)
 ```
 
-## 6. Code Runner (Sandbox)
+---
 
-### 6.1. Требования безопасности
-- Выполнение кода в изолированном Docker-контейнере
-- Ограничение ресурсов:
-  - CPU: 1 core
-  - Memory: 256 MB
-  - Timeout: 10 секунд
-  - Disk: 10 MB (только /tmp)
-  - Network: отключена
-- Запуск от непривилегированного пользователя
-- Read-only filesystem (кроме /tmp)
-- Seccomp profile для ограничения syscalls
+## 4. Конфигурация
 
-### 6.2. Процесс выполнения
-1. Получение задачи из очереди
-2. Создание временного контейнера с кодом пользователя
-3. Последовательный запуск тест-кейсов
-4. Сбор метрик (время, память)
-5. Остановка при первой ошибке
-6. Возврат результата через callback/webhook
-
-### 6.3. Dockerfile.sandbox (Python)
-```dockerfile
-FROM python:3.11-slim
-
-RUN useradd -m -s /bin/bash runner && \
-    mkdir /app && chown runner:runner /app
-
-USER runner
-WORKDIR /app
-
-# Минимальный набор библиотек для алгоритмических задач
-COPY requirements.sandbox.txt .
-RUN pip install --user --no-cache-dir -r requirements.sandbox.txt
-
-COPY --chown=runner:runner runner.py .
-
-CMD ["python", "runner.py"]
-```
-
-## 7. CI/CD Pipeline
-
-### 7.1. GitHub Actions Workflow
+### 4.1. Формат конфигурации
 
 ```yaml
-# .github/workflows/deploy.yml
-name: Deploy
+# config.yaml
+app:
+  name: PracticeRaptor
+  environment: development  # development | staging | production
+  default_language: en      # i18n default
 
-on:
-  push:
-    branches: [main]
+storage:
+  type: json  # json | sqlite | postgresql
+
+  json:
+    base_path: ./data
+
+  sqlite:
+    path: ./data/practiceraptor.db
+
+  postgresql:
+    host: localhost
+    port: 5432
+    database: practiceraptor
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+executor:
+  type: local  # local | docker | remote
+  timeout_sec: 5
+  memory_limit_mb: 256
+
+  docker:
+    image: practiceraptor/executor:latest
+    network: none
+
+  remote:
+    url: http://executor-service:8080
+    api_key: ${EXECUTOR_API_KEY}
+
+auth:
+  type: anonymous  # anonymous | telegram | token
+
+  token:
+    secret: ${JWT_SECRET}
+    expiration_hours: 24
+```
+
+### 4.2. Переменные окружения
+
+```bash
+# .env.example
+
+# Database (for PostgreSQL)
+DB_USER=practiceraptor
+DB_PASSWORD=secure_password
+
+# Executor (for remote)
+EXECUTOR_API_KEY=your_api_key
+
+# Auth (for token-based)
+JWT_SECRET=your_jwt_secret
+
+# Telegram (for bot)
+TELEGRAM_BOT_TOKEN=your_bot_token
+```
+
+---
+
+## 5. Переключаемые адаптеры
+
+### 5.1. Storage Adapters
+
+| Adapter | Когда использовать | Особенности |
+|---------|-------------------|-------------|
+| JSON | CLI, разработка | Файлы, нет зависимостей |
+| SQLite | CLI с историей, тесты | Один файл, SQL |
+| PostgreSQL | Production (TG, Web) | Масштабируемость, ACID |
+
+### 5.2. Executor Adapters
+
+| Adapter | Когда использовать | Особенности |
+|---------|-------------------|-------------|
+| Local | CLI, разработка | multiprocessing, быстрый |
+| Docker | Production | Полная изоляция |
+| Remote | Распределённая система | HTTP API, масштабируемость |
+
+### 5.3. Auth Adapters
+
+| Adapter | Когда использовать | Особенности |
+|---------|-------------------|-------------|
+| Anonymous | CLI | Локальный пользователь |
+| Telegram | Telegram Bot | Telegram ID |
+| Token | Web, Widget | JWT, OAuth |
+
+---
+
+## 6. Тестирование
+
+### 6.1. Принципы
+
+- **TDD** — тесты пишутся ДО кода
+- **Изоляция** — все тесты запускаются в Docker
+- **Покрытие** — минимум 80%, цель 90%
+- **CI Gate** — merge блокируется при падении покрытия
+
+### 6.2. Структура тестов
+
+```
+tests/
+├── unit/                          # Быстрые, изолированные
+│   ├── core/
+│   │   ├── domain/
+│   │   │   ├── test_models.py
+│   │   │   └── test_result.py
+│   │   ├── services/
+│   │   │   ├── test_problems.py
+│   │   │   ├── test_execution.py
+│   │   │   └── test_progress.py
+│   │   └── use_cases/
+│   │       └── test_submit_solution.py
+│   │
+│   └── adapters/
+│       ├── storage/
+│       │   ├── test_json_repository.py
+│       │   └── test_sqlite_repository.py
+│       └── executors/
+│           └── test_local_executor.py
+│
+├── integration/                   # Взаимодействие компонентов
+│   ├── test_solve_problem_flow.py
+│   ├── test_user_progress_flow.py
+│   └── test_storage_migration.py
+│
+├── e2e/                           # End-to-end
+│   ├── test_cli_workflow.py
+│   └── test_api_workflow.py
+│
+├── fixtures/                      # Тестовые данные
+│   ├── problems.py
+│   ├── users.py
+│   └── factories.py
+│
+├── conftest.py                    # Общие fixtures
+└── pytest.ini
+```
+
+### 6.3. Docker-окружение для тестов
+
+```dockerfile
+# docker/Dockerfile.test
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+
+COPY . .
+
+CMD ["pytest", "--cov=practiceraptor", "--cov-report=term-missing", "--cov-fail-under=80"]
+```
+
+```yaml
+# docker/docker-compose.test.yml
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test
+    environment:
+      - PYTHONPATH=/app
+      - CONFIG_PATH=/app/config/config.test.yaml
+    volumes:
+      - ../tests:/app/tests:ro
+      - test-results:/app/results
+
+  test-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: test_practiceraptor
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+
+volumes:
+  test-results:
+```
+
+### 6.4. CI Pipeline
+
+```yaml
+# .github/workflows/test.yml
+name: Test
+
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Run tests
+
+      - name: Run tests in Docker
         run: |
-          docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+          docker-compose -f docker/docker-compose.test.yml up \
+            --build \
+            --abort-on-container-exit \
+            --exit-code-from test
 
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /opt/leetcode-bot
-            git pull origin main
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d
-            docker system prune -f
+      - name: Check coverage
+        run: |
+          # Fail if coverage dropped compared to main branch
+          # (реализация зависит от инструмента)
 ```
 
-### 7.2. Этапы пайплайна
-1. **Lint** — ruff, mypy
-2. **Test** — pytest с coverage
-3. **Build** — сборка Docker образов
-4. **Push** — загрузка в Container Registry (DockerHub / GitHub CR)
-5. **Deploy** — обновление на production сервере
+### 6.5. Пример теста
 
-## 8. Docker Compose
+```python
+# tests/unit/core/services/test_execution.py
+import pytest
+from core.domain.result import Ok, Err
+from core.domain.models import TestCase
+from core.services.execution import validate_code, run_single_test
 
-### 8.1. Development (docker-compose.yml)
-```yaml
-version: '3.8'
+class TestValidateCode:
+    def test_empty_code_returns_error(self):
+        result = validate_code("")
 
-services:
-  bot:
-    build: ./bot
-    env_file: .env
-    depends_on:
-      - api
-      - redis
-    restart: unless-stopped
+        assert result.is_err()
+        assert "empty" in result.error.message.lower()
 
-  api:
-    build: ./api
-    ports:
-      - "8000:8000"
-    env_file: .env
-    depends_on:
-      - db
-      - redis
-    restart: unless-stopped
+    def test_valid_code_returns_ok(self):
+        code = "def solution(x): return x * 2"
+        result = validate_code(code)
 
-  runner:
-    build: ./runner
-    env_file: .env
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - redis
-    restart: unless-stopped
+        assert result.is_ok()
+        assert result.value == code
 
-  db:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: leetcode
-      POSTGRES_USER: leetcode
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    restart: unless-stopped
+    def test_syntax_error_returns_error(self):
+        code = "def solution(x) return x"  # Missing colon
+        result = validate_code(code)
 
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
+        assert result.is_err()
+        assert "syntax" in result.error.message.lower()
 
-volumes:
-  postgres_data:
-  redis_data:
+class TestRunSingleTest:
+    def test_correct_solution_passes(self):
+        code = "def solution(x): return x * 2"
+        test_case = TestCase(
+            input={"x": 5},
+            expected=10,
+        )
+
+        result = run_single_test(code, test_case, timeout=5)
+
+        assert result.is_ok()
+        assert result.value.passed is True
+
+    def test_wrong_answer_fails(self):
+        code = "def solution(x): return x + 2"
+        test_case = TestCase(
+            input={"x": 5},
+            expected=10,
+        )
+
+        result = run_single_test(code, test_case, timeout=5)
+
+        assert result.is_ok()
+        assert result.value.passed is False
+        assert result.value.actual == 7
 ```
 
-## 9. Конфигурация
+---
 
-### 9.1. Переменные окружения (.env.example)
-```bash
-# Telegram
-TELEGRAM_BOT_TOKEN=your_bot_token
+## 7. Технологический стек
 
-# Database
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=leetcode
-DB_USER=leetcode
-DB_PASSWORD=secure_password
+### 7.1. Core
 
-# Redis
-REDIS_URL=redis://redis:6379/0
+| Компонент | Технология | Версия |
+|-----------|------------|--------|
+| Язык | Python | 3.11+ |
+| Типизация | mypy | latest |
+| Линтер | ruff | latest |
+| Форматтер | ruff format | latest |
 
-# API
-API_URL=http://api:8000
-API_SECRET_KEY=your_secret_key
+### 7.2. Clients
 
-# Runner
-RUNNER_TIMEOUT_SEC=10
-RUNNER_MEMORY_LIMIT_MB=256
-RUNNER_CPU_LIMIT=1
+| Клиент | Технология |
+|--------|------------|
+| CLI | typer или click |
+| API | FastAPI |
+| Telegram | aiogram 3.x |
+| Web | FastAPI + Jinja2 / HTMX |
 
-# Environment
-ENV=development  # development | production
-LOG_LEVEL=INFO
-```
+### 7.3. Storage
 
-## 10. Требования к серверу (Production)
+| Хранилище | Технология |
+|-----------|------------|
+| JSON | stdlib (json, pathlib) |
+| SQLite | aiosqlite + SQLAlchemy |
+| PostgreSQL | asyncpg + SQLAlchemy |
 
-### 10.1. Минимальные требования
-- **CPU**: 2 vCPU
-- **RAM**: 4 GB
-- **Disk**: 40 GB SSD
-- **OS**: Ubuntu 22.04 LTS / Debian 12
+### 7.4. Testing
 
-### 10.2. Рекомендуемые требования
-- **CPU**: 4 vCPU
-- **RAM**: 8 GB
-- **Disk**: 80 GB SSD
-- **Network**: 100 Mbps
+| Компонент | Технология |
+|-----------|------------|
+| Framework | pytest |
+| Coverage | pytest-cov |
+| Fixtures | pytest + factory_boy |
+| Async | pytest-asyncio |
 
-### 10.3. Требуемое ПО
-- Docker 24+
-- Docker Compose v2
-- Git
+### 7.5. Infrastructure
 
-## 11. Масштабирование (Future)
+| Компонент | Технология |
+|-----------|------------|
+| Контейнеризация | Docker |
+| Оркестрация | Docker Compose |
+| CI/CD | GitHub Actions |
 
-### 11.1. Горизонтальное масштабирование
-- Несколько инстансов Bot Service за load balancer
-- Несколько Runner workers для параллельного выполнения кода
-- Read replicas для PostgreSQL
+---
 
-### 11.2. Добавление новых языков
-Для каждого нового языка программирования:
-1. Создать Dockerfile.sandbox.{lang}
-2. Реализовать runner адаптер
-3. Добавить language в конфигурацию
-4. Обновить схему БД (function_signature для языка)
+## 8. Требования к окружению
 
-## 12. Метрики и мониторинг
+### 8.1. Development
 
-### 12.1. Ключевые метрики
-- Количество активных пользователей (DAU/MAU)
-- Количество submissions в минуту
-- Среднее время выполнения кода
+| Параметр | Значение |
+|----------|----------|
+| Python | 3.11+ |
+| Docker | 24+ |
+| Docker Compose | v2 |
+| OS | Linux / macOS / WSL2 |
+
+### 8.2. Production (см. roadmap для конкретных этапов)
+
+Минимальные требования зависят от этапа:
+- Stage 1.x: 1 vCPU, 1 GB RAM
+- Stage 2+: 2+ vCPU, 2+ GB RAM
+
+---
+
+## 9. Безопасность
+
+### 9.1. Выполнение кода
+
+- Изоляция: Docker контейнеры или multiprocessing sandbox
+- Лимиты: CPU, память, время выполнения
+- Сеть: отключена в sandbox
+- Файловая система: read-only (кроме /tmp)
+- Whitelist: только разрешённые модули
+
+### 9.2. Данные
+
+- Минимальный сбор данных
+- Секреты в переменных окружения
+- Шифрование чувствительных данных
+- HTTPS для всех внешних соединений
+
+### 9.3. API
+
+- Rate limiting
+- Валидация входных данных (Pydantic)
+- CORS политика
+- Authentication/Authorization
+
+---
+
+## 10. Мониторинг и логирование
+
+### 10.1. Логирование
+
+- Структурированные логи (JSON)
+- Уровни: DEBUG, INFO, WARNING, ERROR
+- Контекст: request_id, user_id, problem_id
+
+### 10.2. Метрики (для Production)
+
+- Количество submissions
+- Время выполнения
 - Процент успешных решений
-- Latency API endpoints
+- API latency
 - Ошибки и exceptions
 
-### 12.2. Health checks
+### 10.3. Health Checks
+
 ```
-GET /health         # API health
-GET /health/db      # Database connectivity
-GET /health/redis   # Redis connectivity
+GET /health          # Общий статус
+GET /health/storage  # Статус хранилища
+GET /health/executor # Статус executor
 ```
-
-## 13. Безопасность
-
-### 13.1. Защита API
-- Rate limiting (per user, per IP)
-- Валидация всех входных данных через Pydantic
-- CORS политика
-- Секреты в переменных окружения (никогда в коде)
-
-### 13.2. Защита Code Runner
-- Полная изоляция в Docker
-- Ограничение ресурсов (CPU, RAM, время)
-- Отключение сети в sandbox
-- Whitelist разрешённых модулей Python
-
-### 13.3. Данные пользователей
-- Минимальный сбор данных (только telegram_id, username)
-- Хэширование чувствительных данных (если появятся)
-- Регулярное резервное копирование БД

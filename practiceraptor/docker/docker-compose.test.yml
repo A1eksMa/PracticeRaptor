@@ -1,0 +1,9 @@
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test
+    volumes:
+      - ../htmlcov:/app/htmlcov
+    environment:
+      - PYTHONPATH=/app

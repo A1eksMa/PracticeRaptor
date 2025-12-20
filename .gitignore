@@ -41,6 +41,18 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+.mypy_cache/
 
 # Logs
 *.log
+
+# Local config
+config/config.yaml
+.env
+
+# Data (keep structure, ignore user content)
+practiceraptor/data/users/
+practiceraptor/data/submissions/
+practiceraptor/data/drafts/
+practiceraptor/data/progress/
+!practiceraptor/data/problems/

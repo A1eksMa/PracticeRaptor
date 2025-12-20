@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir -e ".[dev]"
+
+# Copy source code
+COPY . .
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Default command: run tests with coverage
+CMD ["pytest", \
+     "--cov=core", \
+     "--cov-report=term-missing", \
+     "--cov-fail-under=80", \
+     "-v"]

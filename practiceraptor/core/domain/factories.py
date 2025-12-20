@@ -40,13 +40,14 @@ def create_submission(
     user_id: str,
     problem_id: int,
     code: str,
-    execution_time_ms: int,
+    execution_time_ms: int = 0,
     memory_used_kb: int = 0,
     language: Language = Language.PYTHON,
+    submission_id: str | None = None,
 ) -> Submission:
     """Create a new submission."""
     return Submission(
-        id=str(uuid4()),
+        id=submission_id or str(uuid4()),
         user_id=user_id,
         problem_id=problem_id,
         language=language,
@@ -57,13 +58,24 @@ def create_submission(
     )
 
 
-def create_initial_progress(user_id: str, problem_id: int) -> Progress:
-    """Create initial progress for a problem."""
+def create_progress(
+    user_id: str,
+    problem_id: int,
+    status: ProgressStatus = ProgressStatus.NOT_STARTED,
+    attempts: int = 0,
+    solved_languages: tuple[Language, ...] = (),
+) -> Progress:
+    """Create a progress entry."""
     return Progress(
         user_id=user_id,
         problem_id=problem_id,
-        status=ProgressStatus.NOT_STARTED,
-        attempts=0,
-        solved_languages=(),
+        status=status,
+        attempts=attempts,
+        solved_languages=solved_languages,
         first_solved_at=None,
     )
+
+
+def create_initial_progress(user_id: str, problem_id: int) -> Progress:
+    """Create initial progress for a problem."""
+    return create_progress(user_id=user_id, problem_id=problem_id)

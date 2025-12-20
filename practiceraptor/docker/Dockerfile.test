@@ -15,6 +15,7 @@ ENV PYTHONPATH=/app
 # Default command: run tests with coverage
 CMD ["pytest", \
      "--cov=core", \
+     "--cov=adapters", \
      "--cov-report=term-missing", \
      "--cov-fail-under=80", \
      "-v"]

@@ -56,3 +56,9 @@ practiceraptor/data/submissions/
 practiceraptor/data/drafts/
 practiceraptor/data/progress/
 !practiceraptor/data/problems/
+
+# AI assistent
+.gemini/
+.claude/
+PROJECT_RULES.md
+AGENT_TASK.md

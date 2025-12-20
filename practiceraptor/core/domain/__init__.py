@@ -26,6 +26,7 @@ from .factories import (
     create_user,
     create_draft,
     create_submission,
+    create_progress,
     create_initial_progress,
 )
 
@@ -62,5 +63,6 @@ __all__ = [
     "create_user",
     "create_draft",
     "create_submission",
+    "create_progress",
     "create_initial_progress",
 ]

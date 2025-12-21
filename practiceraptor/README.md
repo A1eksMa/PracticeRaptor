@@ -64,55 +64,35 @@ Telegram-бот для практики алгоритмических зада�
 
 ### Hexagonal Architecture (Ports & Adapters)
 
-  ┌─────────────────────────────────────────────────────────────┐
-  │                         CLIENTS                              │
-  │         CLI │ Telegram │ Web │ Widget                        │
-  └──────────────────────────┬──────────────────────────────────┘
-                             │
-                             ▼
-  ┌─────────────────────────────────────────────────────────────┐
-  │                      CORE (ядро)                             │
-  │                                                              │
-  │   Работает через интерфейсы (Ports):                         │
-  │   • IProblemRepository (чтение задач)                        │
-  │   • IUserRepository (управление пользователями)              │
-  │   • IDraftRepository (черновики кода)                        │
-  │   • ISubmissionRepository (решения пользователей)            │
-  │   • IProgressRepository (прогресс пользователя по задачам)   │
-  │   • ICodeExecutor (выполнение кода)                          │
-  │   • IAuthProvider (аутентификация)                           │
-  └──────────────────────────┬──────────────────────────────────┘
-                             │
-           ┌─────────────────┼─────────────────┐
-           ▼                 ▼                 ▼
-  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-  │   STORAGE   │    │  EXECUTOR   │    │    AUTH     │
-  │ JSON        │    │ Local       │    │ Anonymous   │
-  │ SQLite      │    │ Docker      │    │ Telegram    │
-  │ PostgreSQL  │    │ Remote API  │    │ Token/OAuth │
-  └─────────────┘    └─────────────┘    └─────────────┘
+```mermaid
+graph TD
+    A[CLIENTS <br/> CLI | Telegram | Web | Widget] --> B(CORE (ядро) <br/> Работает через интерфейсы (Ports): <br/> • IProblemRepository <br/> • IUserRepository <br/> • IDraftRepository <br/> • ISubmissionRepository <br/> • • IProgressRepository <br/> • ICodeExecutor <br/> • IAuthProvider)
+    B --> C[STORAGE <br/> JSON <br/> SQLite <br/> PostgreSQL]
+    B --> D[EXECUTOR <br/> Local <br/> Docker <br/> Remote API]
+    B --> E[AUTH <br/> Anonymous <br/> Telegram <br/> Token/OAuth]
+```
 
 ### Примеры конфигураций
 
 Гибкая система конфигурации позволяет легко переключать адаптеры.
 
-  Разработка / CLI:
-  storage: json
-  executor: local
-  auth: anonymous
+*   **Разработка / CLI:**
+    *   `storage: json`
+    *   `executor: local`
+    *   `auth: anonymous`
 
-  Конфигурация интрефейса командной строки загружается из `config/config.yaml` (или `config/config.test.yaml` для тестов).
+    Конфигурация интрефейса командной строки загружается из `config/config.yaml` (или `config/config.test.yaml` для тестов).
 
-  Telegram на VPS (планируется):
-  storage: postgresql
-  executor: docker
-  auth: telegram
+*   **Telegram на VPS (планируется):**
+    *   `storage: postgresql`
+    *   `executor: docker`
+    *   `auth: telegram`
 
-  Экзотическая комбинация (планируется):
-  storage: json           # файлы локально
-  executor: remote        # сервис на другом сервере
-    url: http://executor.example.com:8080
-  auth: telegram
+*   **Экзотическая комбинация (планируется):**
+    *   `storage: json`           # файлы локально
+    *   `executor: remote`        # сервис на другом сервере
+        *   `url: http://executor.example.com:8080`
+    *   `auth: telegram`
 
 ### Текущее состояние компонентов (Stage 1.5)
 

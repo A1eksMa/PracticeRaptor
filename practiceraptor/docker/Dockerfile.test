@@ -16,6 +16,9 @@ ENV PYTHONPATH=/app
 CMD ["pytest", \
      "--cov=core", \
      "--cov=adapters", \
+     "--cov=di", \
+     "--cov=clients", \
      "--cov-report=term-missing", \
+     "--cov-report=html:htmlcov", \
      "--cov-fail-under=80", \
      "-v"]

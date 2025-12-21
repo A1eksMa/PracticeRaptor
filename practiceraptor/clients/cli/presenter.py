@@ -58,7 +58,8 @@ def display_problem(
     # Examples
     examples = format_examples(problem, locale)
     for ex in examples:
-        print(f"\n{Colors.bold(f'Example {ex[\"number\"]}:')}")
+        ex_num = ex["number"]
+        print(f"\n{Colors.bold(f'Example {ex_num}:')}")
         print(f"  Input: {_format_input(ex['input'])}")
         print(f"  Output: {ex['output']}")
         if "explanation" in ex:

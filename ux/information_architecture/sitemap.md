@@ -142,9 +142,10 @@ flowchart TD
     HINT --> SOLVE
 
     RESULT -->|Accepted| SUBMISSION[Submission]
-    RESULT -->|Error/Wrong| SOLVE
+    RESULT -->|Error/Wrong| SUBMISSION[Submission]
 
     SUBMISSION -->|к списку| LIST
+    SUBMISSION -->|к решению| SOLVE
 ```
 
 ### 6.2. Глобальная навигация
@@ -153,13 +154,15 @@ flowchart TD
 flowchart LR
     subgraph GLOBAL[Глобальная навигация]
         LIST[Список задач]
+        DETAILS[Problem]
         SOLVE[Solution]
         PROFILE[Профиль]
         SETTINGS[Настройки]
 
     end
 
-    LIST <-.->|всегда доступно| SOLVE
+    LIST <-.->|всегда доступно| DETAILS
+    DETAILS <-.->|всегда доступно| SOLVE
     SOLVE <-.->|всегда доступно| PROFILE
     PROFILE <-.->|всегда доступно| SETTINGS
     SETTINGS <-.->|всегда доступно| LIST
@@ -234,7 +237,7 @@ flowchart TB
 
 ---
 
-## 9. Доступность Solutions
+## 9. Доступ к решениям и подсказкам
 
 | Раздел | Доступность |
 |--------|-------------|
@@ -242,7 +245,7 @@ flowchart TB
 | Editorial | Всегда доступен |
 | Community Solutions | Всегда доступны |
 
-> **Примечание:** В отличие от некоторых платформ, PracticeRaptor не блокирует решения. Философия: пользователь сам решает, когда ему нужна помощь. Обучение важнее геймификации.
+> **Примечание:** Философия PracticeRaptorФилософия: пользователь сам решает, когда ему нужна помощь.
 
 ---
 

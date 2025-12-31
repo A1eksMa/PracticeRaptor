@@ -155,7 +155,6 @@ flowchart TD
 flowchart LR
     subgraph GLOBAL[Глобальная навигация]
         LIST[Список задач]
-        DETAILS[Детали задачи]
         SOLVE[Решение задачи]
         PROFILE[Профиль]
         SETTINGS[Настройки]
@@ -166,10 +165,6 @@ flowchart LR
     LIST <-.->|всегда доступно| SOLVE
     LIST <-.->|всегда доступно| PROFILE
     LIST <-.->|всегда доступно| SETTINGS
-    DETAILS <-.->|всегда доступно| LIST
-    DETAILS <-.->|всегда доступно| SOLVE
-    DETAILS <-.->|всегда доступно| PROFILE
-    DETAILS <-.->|всегда доступно| SETTINGS
     SOLVE <-.->|всегда доступно| LIST
     SOLVE <-.->|всегда доступно| DETAILS
     SOLVE <-.->|всегда доступно| PROFILE

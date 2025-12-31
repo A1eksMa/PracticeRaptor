@@ -25,6 +25,7 @@ PracticeRaptor
 │   ├── Сложность
 │   ├── Эталонное решение (Editorial) — теория + разбор
 │   ├── Community Solutions
+│   │   └── [Пагинация]
 │   └── Начать решать → [Solution]
 │
 ├── Решение задачи (Solution)
@@ -82,7 +83,7 @@ Welcome to PracticeRaptor!
 
 > help                    # справка
 > list                    # список задач
-> list --difficulty=easy  # с быстрым фильтром
+> list --difficulty easy  # с быстрым фильтром
 > profile                 # профиль
 > config                  # настройки
 > exit                    # выход
@@ -154,18 +155,33 @@ flowchart TD
 flowchart LR
     subgraph GLOBAL[Глобальная навигация]
         LIST[Список задач]
-        DETAILS[Problem]
-        SOLVE[Solution]
+        DETAILS[Детали задачи]
+        SOLVE[Решение задачи]
         PROFILE[Профиль]
         SETTINGS[Настройки]
 
     end
 
     LIST <-.->|всегда доступно| DETAILS
+    LIST <-.->|всегда доступно| SOLVE
+    LIST <-.->|всегда доступно| PROFILE
+    LIST <-.->|всегда доступно| SETTINGS
+    DETAILS <-.->|всегда доступно| LIST
     DETAILS <-.->|всегда доступно| SOLVE
+    DETAILS <-.->|всегда доступно| PROFILE
+    DETAILS <-.->|всегда доступно| SETTINGS
+    SOLVE <-.->|всегда доступно| LIST
+    SOLVE <-.->|всегда доступно| DETAILS
     SOLVE <-.->|всегда доступно| PROFILE
+    SOLVE <-.->|всегда доступно| SETTINGS
+    PROFILE <-.->|всегда доступно| LIST
+    PROFILE <-.->|всегда доступно| DETAILS
+    PROFILE <-.->|всегда доступно| SOLVE
     PROFILE <-.->|всегда доступно| SETTINGS
     SETTINGS <-.->|всегда доступно| LIST
+    SETTINGS <-.->|всегда доступно| DETAILS
+    SETTINGS <-.->|всегда доступно| SOLVE
+    SETTINGS <-.->|всегда доступно| PROFILE
 ```
 
 ### 6.3. Контекстная навигация из разделов

@@ -186,7 +186,7 @@ flowchart TB
         D4[Назад к списку]
     end
 
-    subgraph SOLVE_CTX[Из Solve Task]
+    subgraph SOLVE_CTX[Из Solution]
         S1[Быстрая проверка]
         S2[Полная проверка]
         S3[Отмена → Детали]
@@ -226,7 +226,9 @@ flowchart TB
 
 ## 8. Маппинг на интерфейсы
 
-| Действие | CLI (REPL) | Telegram | Web |
+* Список команд CLI является приблизительным и требует уточнения
+
+| Действие | CLI (REPL) * | Telegram | Web |
 |----------|------------|----------|-----|
 | Список задач | `list [filters]` | inline-кнопки фильтров | `/problems?filters` |
 | Детали задачи | `show <slug>` | inline-кнопка | `/problems/:slug` |

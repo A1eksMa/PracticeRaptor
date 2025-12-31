@@ -80,13 +80,11 @@ PracticeRaptor
 $ practiceraptor
 Welcome to PracticeRaptor!
 
+> help                    # справка
 > list                    # список задач
-> list --difficulty=easy  # с фильтром
-> show two-sum            # детали задачи
-> solve                   # начать решение
+> list --difficulty=easy  # с быстрым фильтром
 > profile                 # профиль
 > config                  # настройки
-> help                    # справка
 > exit                    # выход
 ```
 

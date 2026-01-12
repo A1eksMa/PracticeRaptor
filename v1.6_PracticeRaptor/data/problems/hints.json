@@ -1,0 +1,32 @@
+[
+  {
+    "problem_id": 1,
+    "language": "en",
+    "hint": "Think about using a hash map to store numbers you've already seen. For each number, check if (target - current_number) exists in the map."
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "hint": "Подумайте об использовании хеш-таблицы для хранения чисел, которые вы уже видели. Для каждого числа проверяйте, существует ли (target - текущее_число) в таблице."
+  },
+  {
+    "problem_id": 2,
+    "language": "en",
+    "hint": "Try using two pointers, one starting from the beginning and one from the end. Swap the characters and move towards the center."
+  },
+  {
+    "problem_id": 2,
+    "language": "ru",
+    "hint": "Попробуйте использовать два указателя: один начинается с начала, другой с конца. Меняйте символы местами и двигайтесь к центру."
+  },
+  {
+    "problem_id": 3,
+    "language": "en",
+    "hint": "First, clean the string by keeping only alphanumeric characters in lowercase. Then check if the cleaned string reads the same forwards and backwards."
+  },
+  {
+    "problem_id": 3,
+    "language": "ru",
+    "hint": "Сначала очистите строку, оставив только алфавитно-цифровые символы в нижнем регистре. Затем проверьте, читается ли очищенная строка одинаково в обоих направлениях."
+  }
+]

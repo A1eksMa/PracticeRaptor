@@ -1,0 +1,23 @@
+[
+  {
+    "problem_id": 1,
+    "supported_languages": ["en", "ru"],
+    "supported_programming_languages": ["python3", "java"],
+    "difficulty": "easy",
+    "categories": ["Array", "Hash Table"]
+  },
+  {
+    "problem_id": 2,
+    "supported_languages": ["en", "ru"],
+    "supported_programming_languages": ["python3"],
+    "difficulty": "easy",
+    "categories": ["String", "Two Pointers"]
+  },
+  {
+    "problem_id": 3,
+    "supported_languages": ["en", "ru"],
+    "supported_programming_languages": ["python3"],
+    "difficulty": "easy",
+    "categories": ["String", "Two Pointers"]
+  }
+]

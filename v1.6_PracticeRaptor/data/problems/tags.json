@@ -1,0 +1,38 @@
+[
+  {
+    "problem_id": 1,
+    "tag": "array"
+  },
+  {
+    "problem_id": 1,
+    "tag": "hash-table"
+  },
+  {
+    "problem_id": 1,
+    "tag": "interview"
+  },
+  {
+    "problem_id": 2,
+    "tag": "string"
+  },
+  {
+    "problem_id": 2,
+    "tag": "two-pointers"
+  },
+  {
+    "problem_id": 2,
+    "tag": "in-place"
+  },
+  {
+    "problem_id": 3,
+    "tag": "string"
+  },
+  {
+    "problem_id": 3,
+    "tag": "two-pointers"
+  },
+  {
+    "problem_id": 3,
+    "tag": "palindrome"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "problem_id": 1,
+    "language": "en",
+    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order."
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "description": "Дан массив целых чисел nums и целое число target. Верните индексы двух чисел, сумма которых равна target.\n\nМожно предположить, что каждый вход имеет ровно одно решение, и вы не можете использовать один и тот же элемент дважды.\n\nВернуть ответ можно в любом порядке."
+  },
+  {
+    "problem_id": 2,
+    "language": "en",
+    "description": "Write a function that reverses a string. The input string is given as an array of characters s.\n\nYou must do this by modifying the input array in-place with O(1) extra memory."
+  },
+  {
+    "problem_id": 2,
+    "language": "ru",
+    "description": "Напишите функцию, которая разворачивает строку. Входная строка задана как массив символов s.\n\nВы должны сделать это, изменив входной массив на месте с использованием O(1) дополнительной памяти."
+  },
+  {
+    "problem_id": 3,
+    "language": "en",
+    "description": "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.\n\nGiven a string s, return true if it is a palindrome, or false otherwise."
+  },
+  {
+    "problem_id": 3,
+    "language": "ru",
+    "description": "Фраза является палиндромом, если после преобразования всех прописных букв в строчные и удаления всех неалфавитно-цифровых символов она читается одинаково как слева направо, так и справа налево. Алфавитно-цифровые символы включают буквы и цифры.\n\nДана строка s, верните true, если это палиндром, или false в противном случае."
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "problem_id": 1,
+    "language": "en",
+    "editorial": "The optimal solution uses a hash map to store numbers we've seen and their indices. For each number, we check if its complement (target - number) exists in the map. This gives us O(n) time complexity with O(n) space."
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "editorial": "Оптимальное решение использует хеш-таблицу для хранения чисел, которые мы видели, и их индексов. Для каждого числа мы проверяем, существует ли его дополнение (target - число) в таблице. Это дает нам временную сложность O(n) с пространством O(n)."
+  },
+  {
+    "problem_id": 2,
+    "language": "en",
+    "editorial": "Use two pointers approach: one at the start and one at the end. Swap characters and move pointers towards the center. This achieves O(n) time with O(1) extra space."
+  },
+  {
+    "problem_id": 2,
+    "language": "ru",
+    "editorial": "Используйте подход двух указателей: один в начале, другой в конце. Меняйте символы местами и перемещайте указатели к центру. Это достигает O(n) времени с O(1) дополнительным пространством."
+  },
+  {
+    "problem_id": 3,
+    "language": "en",
+    "editorial": "Clean the string by removing non-alphanumeric characters and converting to lowercase. Then use two pointers to compare characters from both ends moving towards the center."
+  },
+  {
+    "problem_id": 3,
+    "language": "ru",
+    "editorial": "Очистите строку, удалив неалфавитно-цифровые символы и преобразовав в нижний регистр. Затем используйте два указателя для сравнения символов с обоих концов, двигаясь к центру."
+  }
+]

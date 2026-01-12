@@ -1,0 +1,24 @@
+[
+  {
+    "user_id": 1,
+    "language": "ru",
+    "programming_language": "python3",
+    "text_editor": "vim",
+    "select_problem_id": null,
+    "select_difficulty": "easy",
+    "select_tags": ["array", "hash-table"],
+    "select_category": "Array",
+    "select_status": null
+  },
+  {
+    "user_id": 2,
+    "language": "en",
+    "programming_language": "python3",
+    "text_editor": "default",
+    "select_problem_id": 1,
+    "select_difficulty": null,
+    "select_tags": [],
+    "select_category": null,
+    "select_status": "not_started"
+  }
+]

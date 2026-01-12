@@ -1,0 +1,42 @@
+[
+  {
+    "canonical_solution_id": 1,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "name": "Hash Map (One Pass)",
+    "complexity": "O(n)",
+    "canonical_solution": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []"
+  },
+  {
+    "canonical_solution_id": 2,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "name": "Brute Force",
+    "complexity": "O(n²)",
+    "canonical_solution": "def two_sum(nums: list[int], target: int) -> list[int]:\n    for i in range(len(nums)):\n        for j in range(i + 1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return []"
+  },
+  {
+    "canonical_solution_id": 3,
+    "problem_id": 1,
+    "programming_language": "java",
+    "name": "Hash Map",
+    "complexity": "O(n)",
+    "canonical_solution": "public int[] twoSum(int[] nums, int target) {\n    Map<Integer, Integer> map = new HashMap<>();\n    for (int i = 0; i < nums.length; i++) {\n        int complement = target - nums[i];\n        if (map.containsKey(complement)) {\n            return new int[] { map.get(complement), i };\n        }\n        map.put(nums[i], i);\n    }\n    return new int[] {};\n}"
+  },
+  {
+    "canonical_solution_id": 4,
+    "problem_id": 2,
+    "programming_language": "python3",
+    "name": "Two Pointers",
+    "complexity": "O(n)",
+    "canonical_solution": "def reverse_string(s: list[str]) -> None:\n    left, right = 0, len(s) - 1\n    while left < right:\n        s[left], s[right] = s[right], s[left]\n        left += 1\n        right -= 1"
+  },
+  {
+    "canonical_solution_id": 5,
+    "problem_id": 3,
+    "programming_language": "python3",
+    "name": "Two Pointers",
+    "complexity": "O(n)",
+    "canonical_solution": "def is_palindrome(s: str) -> bool:\n    cleaned = ''.join(c.lower() for c in s if c.isalnum())\n    left, right = 0, len(cleaned) - 1\n    while left < right:\n        if cleaned[left] != cleaned[right]:\n            return False\n        left += 1\n        right -= 1\n    return True"
+  }
+]

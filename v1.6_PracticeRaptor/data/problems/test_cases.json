@@ -1,0 +1,79 @@
+[
+  {
+    "test_case_id": 1,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([2, 7, 11, 15], 9) == [0, 1]",
+    "is_example": true
+  },
+  {
+    "test_case_id": 2,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([3, 2, 4], 6) == [1, 2]",
+    "is_example": true
+  },
+  {
+    "test_case_id": 3,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([3, 3], 6) == [0, 1]",
+    "is_example": true
+  },
+  {
+    "test_case_id": 4,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([1, 2, 4, 8], 9) == [0, 3]",
+    "is_example": false
+  },
+  {
+    "test_case_id": 5,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([-1, -2, -3, -4, -5], -8) == [2, 4]",
+    "is_example": false
+  },
+  {
+    "test_case_id": 6,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([0, 4, 3, 0], 0) == [0, 3]",
+    "is_example": false
+  },
+  {
+    "test_case_id": 7,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "test": "assert two_sum([1, 2], 3) == [0, 1]",
+    "is_example": false
+  },
+  {
+    "test_case_id": 8,
+    "problem_id": 2,
+    "programming_language": "python3",
+    "test": "s = ['h','e','l','l','o']; reverse_string(s); assert s == ['o','l','l','e','h']",
+    "is_example": true
+  },
+  {
+    "test_case_id": 9,
+    "problem_id": 2,
+    "programming_language": "python3",
+    "test": "s = ['H','a','n','n','a','h']; reverse_string(s); assert s == ['h','a','n','n','a','H']",
+    "is_example": true
+  },
+  {
+    "test_case_id": 10,
+    "problem_id": 3,
+    "programming_language": "python3",
+    "test": "assert is_palindrome('A man, a plan, a canal: Panama') == True",
+    "is_example": true
+  },
+  {
+    "test_case_id": 11,
+    "problem_id": 3,
+    "programming_language": "python3",
+    "test": "assert is_palindrome('race a car') == False",
+    "is_example": true
+  }
+]

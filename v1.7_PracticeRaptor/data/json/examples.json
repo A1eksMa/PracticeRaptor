@@ -1,0 +1,20 @@
+[
+  {
+    "example_id": 1,
+    "problem_id": 1,
+    "input": "nums = [2, 7, 11, 15], target = 9",
+    "output": "[0, 1]"
+  },
+  {
+    "example_id": 2,
+    "problem_id": 1,
+    "input": "nums = [3, 2, 4], target = 6",
+    "output": "[1, 2]"
+  },
+  {
+    "example_id": 3,
+    "problem_id": 2,
+    "input": "s = [\"h\", \"e\", \"l\", \"l\", \"o\"]",
+    "output": "[\"o\", \"l\", \"l\", \"e\", \"h\"]"
+  }
+]

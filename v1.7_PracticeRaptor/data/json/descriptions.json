@@ -1,0 +1,22 @@
+[
+  {
+    "problem_id": 1,
+    "language": "en",
+    "description": "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice."
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "description": "Дан массив целых чисел `nums` и целое число `target`. Верните индексы двух чисел, сумма которых равна `target`.\n\nМожно предположить, что каждый вход имеет ровно одно решение, и нельзя использовать один и тот же элемент дважды."
+  },
+  {
+    "problem_id": 2,
+    "language": "en",
+    "description": "Write a function that reverses a string. The input string is given as an array of characters."
+  },
+  {
+    "problem_id": 2,
+    "language": "ru",
+    "description": "Напишите функцию, которая разворачивает строку. Входная строка задана как массив символов."
+  }
+]

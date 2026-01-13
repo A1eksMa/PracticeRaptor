@@ -1,0 +1,20 @@
+[
+  {
+    "problem_id": 1,
+    "programming_language": "python3",
+    "template": "def two_sum(nums: list[int], target: int) -> list[int]:",
+    "function_name": "two_sum"
+  },
+  {
+    "problem_id": 1,
+    "programming_language": "java",
+    "template": "public int[] twoSum(int[] nums, int target)",
+    "function_name": "twoSum"
+  },
+  {
+    "problem_id": 2,
+    "programming_language": "python3",
+    "template": "def reverse_string(s: list[str]) -> None:",
+    "function_name": "reverse_string"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "problem_id": 1,
+    "language": "en",
+    "editorial": "## Approach 1: Hash Map\n\nWe can solve this problem in O(n) time using a hash map.\n\n1. Iterate through the array\n2. For each element, check if `target - element` exists in the hash map\n3. If yes, return the indices\n4. If no, add current element to the hash map"
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "editorial": "## Подход 1: Хеш-таблица\n\nМы можем решить эту задачу за O(n) времени, используя хеш-таблицу.\n\n1. Проходим по массиву\n2. Для каждого элемента проверяем, есть ли `target - element` в хеш-таблице\n3. Если да — возвращаем индексы\n4. Если нет — добавляем текущий элемент в хеш-таблицу"
+  }
+]

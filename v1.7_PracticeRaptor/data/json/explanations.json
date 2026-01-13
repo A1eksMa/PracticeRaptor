@@ -1,0 +1,22 @@
+[
+  {
+    "example_id": 1,
+    "language": "en",
+    "explanation": "Because nums[0] + nums[1] == 9, we return [0, 1]."
+  },
+  {
+    "example_id": 1,
+    "language": "ru",
+    "explanation": "Поскольку nums[0] + nums[1] == 9, возвращаем [0, 1]."
+  },
+  {
+    "example_id": 2,
+    "language": "en",
+    "explanation": "Because nums[1] + nums[2] == 6, we return [1, 2]."
+  },
+  {
+    "example_id": 2,
+    "language": "ru",
+    "explanation": "Поскольку nums[1] + nums[2] == 6, возвращаем [1, 2]."
+  }
+]

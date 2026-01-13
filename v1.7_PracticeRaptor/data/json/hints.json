@@ -1,0 +1,26 @@
+[
+  {
+    "problem_id": 1,
+    "language": "en",
+    "hint_index": 0,
+    "hint": "Try using a hash map to store values you've seen."
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "hint_index": 0,
+    "hint": "Попробуйте использовать хеш-таблицу для хранения уже просмотренных значений."
+  },
+  {
+    "problem_id": 1,
+    "language": "en",
+    "hint_index": 1,
+    "hint": "For each number, check if target - number exists in the hash map."
+  },
+  {
+    "problem_id": 1,
+    "language": "ru",
+    "hint_index": 1,
+    "hint": "Для каждого числа проверьте, существует ли target - number в хеш-таблице."
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "canonical_solution_id": 1,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "name": "Hash Map (One Pass)",
+    "complexity": "O(n)",
+    "code": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []"
+  },
+  {
+    "canonical_solution_id": 2,
+    "problem_id": 1,
+    "programming_language": "python3",
+    "name": "Brute Force",
+    "complexity": "O(n²)",
+    "code": "def two_sum(nums: list[int], target: int) -> list[int]:\n    for i in range(len(nums)):\n        for j in range(i + 1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return []"
+  },
+  {
+    "canonical_solution_id": 3,
+    "problem_id": 2,
+    "programming_language": "python3",
+    "name": "Two Pointers",
+    "complexity": "O(n)",
+    "code": "def reverse_string(s: list[str]) -> None:\n    left, right = 0, len(s) - 1\n    while left < right:\n        s[left], s[right] = s[right], s[left]\n        left += 1\n        right -= 1"
+  }
+]

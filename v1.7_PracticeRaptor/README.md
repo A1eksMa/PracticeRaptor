@@ -70,7 +70,8 @@ v1.7_PracticeRaptor/
 ├── core/                    # Чистая бизнес-логика (без I/O)
 │   ├── domain/             # Богатые объекты для работы в коде
 │   ├── persistence/        # Плоские структуры + mappers
-│   └── ports/              # Интерфейсы (контракты)
+│   ├── ports/              # Интерфейсы (контракты)
+│   └── services/           # Use Cases (оркестрация)
 │
 ├── adapters/               # Реализации интерфейсов (I/O)
 │   └── storage/
@@ -166,5 +167,6 @@ print(problem.hints[0].get("ru"))        # "Попробуйте использ�
 - [core/domain/README.md](core/domain/README.md) — Domain Models
 - [core/persistence/README.md](core/persistence/README.md) — Records и Mappers
 - [core/ports/README.md](core/ports/README.md) — Интерфейсы
+- [core/services/README.md](core/services/README.md) — Use Cases (оркестрация)
 - [adapters/README.md](adapters/README.md) — Реализации репозиториев
 - [data/README.md](data/README.md) — Структура данных

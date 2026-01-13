@@ -60,7 +60,7 @@ class Solution:
     Represents the complete working context for solving a problem:
     - Signature and canonical solutions (from problem definition)
     - User's code (initially empty, filled during solving)
-    - All tests and indices for quick check (examples)
+    - Test cases: all and examples subset
 
     Usage:
         # Create from problem specification
@@ -68,15 +68,15 @@ class Solution:
             problem_id=1,
             programming_language=ProgrammingLanguage.PYTHON,
             function_signature=signature,
-            tests=all_tests,
-            test_cases=(0, 1, 2)  # Indices for quick check
+            all_test_cases=all_tests,
+            example_test_cases=example_tests,
         )
 
         # User writes code
         solution = replace(solution, code=user_code)
 
-        # Quick check runs only test_cases indices
-        # Full submission runs all tests
+        # Quick check runs example_test_cases
+        # Full submission runs all_test_cases
     """
 
     problem_id: int
@@ -84,8 +84,8 @@ class Solution:
     function_signature: Signature
     canonical_solutions: tuple[CanonicalSolution, ...] = ()
     code: str = ""
-    tests: tuple[TestCase, ...] = ()
-    test_cases: tuple[int, ...] = ()
+    all_test_cases: tuple[TestCase, ...] = ()
+    example_test_cases: tuple[TestCase, ...] = ()
 
 
 @dataclass(frozen=True)

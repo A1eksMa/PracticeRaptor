@@ -7,6 +7,7 @@ All fields are primitives - ready for serialization.
 from dataclasses import dataclass
 
 
+
 @dataclass
 class SignatureRecord:
     """Function signature for a programming language.
@@ -16,9 +17,8 @@ class SignatureRecord:
     """
 
     problem_id: int
-    programming_language: str  # "python3", "java"
-    template: str  # "def two_sum(nums: list[int], target: int) -> list[int]:"
-    function_name: str  # "two_sum"
+    programming_language: str  # "python3"
+    signature: str  # "def two_sum(nums: list[int], target: int) -> list[int]:"
 
 
 @dataclass
@@ -32,7 +32,7 @@ class TestCaseRecord:
     test_case_id: int
     problem_id: int
     programming_language: str
-    code: str  # "assert two_sum([2, 7, 11, 15], 9) == [0, 1]"
+    test: str  # "assert two_sum([2, 7, 11, 15], 9) == [0, 1]"
     is_example: bool  # True = shown in problem examples
 
 

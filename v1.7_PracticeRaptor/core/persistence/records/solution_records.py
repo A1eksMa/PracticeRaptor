@@ -7,17 +7,16 @@ All fields are primitives - ready for serialization.
 from dataclasses import dataclass
 
 
-
 @dataclass
 class SignatureRecord:
     """Function signature for a programming language.
 
     Maps to: signatures.json / TABLE signatures
-    Primary key: (problem_id, programming_language)
+    Primary key: (problem_id, language)
     """
 
     problem_id: int
-    programming_language: str  # "python3"
+    language: str  # "python3"
     signature: str  # "def two_sum(nums: list[int], target: int) -> list[int]:"
 
 
@@ -31,7 +30,7 @@ class TestCaseRecord:
 
     test_case_id: int
     problem_id: int
-    programming_language: str
+    language: str
     test: str  # "assert two_sum([2, 7, 11, 15], 9) == [0, 1]"
     is_example: bool  # True = shown in problem examples
 
@@ -46,7 +45,24 @@ class CanonicalSolutionRecord:
 
     canonical_solution_id: int
     problem_id: int
-    programming_language: str
+    language: str
     name: str  # "Hash Map (One Pass)"
     complexity: str  # "O(n)"
     code: str
+
+
+@dataclass
+class SolutionRecord:
+    """Working solution context for problem solving.
+
+    Maps to: solutions.json / TABLE solutions
+    Primary key: solution_id
+    """
+
+    solution_id: int
+    problem_id: int
+    language: str  # References ProgrammingLanguage enum string value
+    signature_id: int  # References SignatureRecord.signature_id
+    test_case_ids: list[int]  # References TestCaseRecord.test_case_id
+    canonical_solution_ids: list[int]  # References CanonicalSolutionRecord.canonical_solution_id
+    code: str = ""

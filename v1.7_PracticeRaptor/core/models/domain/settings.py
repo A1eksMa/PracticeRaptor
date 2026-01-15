@@ -10,6 +10,7 @@ from .enums import (
     ProblemStatus,
     TextEditor,
 )
+from .user import User, DEFAULT_USER
 
 
 @dataclass(frozen=True)
@@ -20,7 +21,7 @@ class Settings:
     and ephemeral session state (current filters and selection).
     """
 
-    user_id: int = 0
+    user: User = DEFAULT_USER
 
     # Persistent preferences
     language: Language = Language.EN
@@ -36,9 +37,4 @@ class Settings:
 
 
 # Default settings for new users
-DEFAULT_SETTINGS = Settings(
-    user_id=0,
-    language=Language.EN,
-    programming_language=ProgrammingLanguage.PYTHON,
-    text_editor=TextEditor.DEFAULT,
-)
+DEFAULT_SETTINGS = Settings()

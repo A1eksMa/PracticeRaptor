@@ -5,6 +5,7 @@ from datetime import datetime
 
 from .enums import ExecutionStatus
 from .solution import Solution, TestCase
+from .user import User, DEFAULT_USER
 
 
 @dataclass(frozen=True)
@@ -29,13 +30,27 @@ class Execution:
     To persist, wrap in Submission.
     """
 
-    user_id: int
+    user: User = DEFAULT_USER
     solution: Solution
-    total_time_ms: int = 0
-    memory_used_kb: int = 0
+
     test_results: tuple[TestResult, ...] = ()
+    
+    total_time_ms: int = 0
+    # TODO:
+    # @property 
+    # def total_time_ms(self) -> int:
+
+    memory_used_kb: int = 0
+    # TODO:
+    # @property 
+    # def memory_used_kb(self) -> int:
+    
     error_message: str | None = None
-    result: ExecutionStatus = ExecutionStatus.ACCEPTED
+    # TODO:
+    # @property 
+    # def  error_message(self) -> int:
+    
+    result: ExecutionStatus
 
     @property
     def passed_count(self) -> int:
@@ -77,7 +92,7 @@ class Draft:
     """
 
     draft_id: int
-    user_id: int
+    user: User = DEFAULT_USER
     solution: Solution
     created_at: datetime
     updated_at: datetime

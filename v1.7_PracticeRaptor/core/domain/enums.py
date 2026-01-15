@@ -3,21 +3,20 @@
 from enum import Enum
 
 
-class Language(Enum):
-    """Interface language for UI."""
+Language(str, Enum):
+    """Supported languages for UI."""
 
-    EN = "en"
     RU = "ru"
 
 
-class ProgrammingLanguage(Enum):
+class ProgrammingLanguage(str, Enum):
     """Programming language for code execution."""
 
     PYTHON = "python3"
     JAVA = "java"
 
 
-class Difficulty(Enum):
+Difficulty(str, Enum):
     """Problem difficulty level."""
 
     EASY = "easy"
@@ -25,7 +24,7 @@ class Difficulty(Enum):
     HARD = "hard"
 
 
-class Category(Enum):
+class Category(str, Enum):
     """Algorithmic problem category."""
 
     ARRAY = "Array"
@@ -47,7 +46,7 @@ class Category(Enum):
     TWO_POINTERS = "Two Pointers"
 
 
-class Complexity(Enum):
+class Complexity(str, Enum):
     """Algorithmic complexity (Big O notation)."""
 
     O_1 = "O(1)"
@@ -60,7 +59,7 @@ class Complexity(Enum):
     O_N_FACTORIAL = "O(n!)"
 
 
-class ProblemStatus(Enum):
+class ProblemStatus(str, Enum):
     """User's progress status on a problem."""
 
     NOT_STARTED = "not_started"
@@ -68,7 +67,7 @@ class ProblemStatus(Enum):
     SOLVED = "solved"
 
 
-class ExecutionStatus(Enum):
+class ExecutionStatus(str, Enum):
     """Code execution result status."""
 
     ACCEPTED = "accepted"

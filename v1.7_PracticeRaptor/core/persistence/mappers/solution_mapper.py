@@ -38,14 +38,13 @@ def records_to_solution(
     """
     signature = Signature(
         language=ProgrammingLanguage(signature_rec.programming_language),
-        template=signature_rec.template,
-        function_name=signature_rec.function_name,
+        signature=signature_rec.signature,
     )
 
     test_cases = tuple(
         TestCase(
             language=ProgrammingLanguage(rec.programming_language),
-            code=rec.code,
+            test=rec.test,
             is_example=rec.is_example,
         )
         for rec in test_case_recs
@@ -99,8 +98,7 @@ def solution_to_records(
     signature_rec = SignatureRecord(
         problem_id=problem_id,
         programming_language=solution.language.value,
-        template=solution.signature.template,
-        function_name=solution.signature.function_name,
+        signature=solution.signature.signature,
     )
 
     test_case_recs = [
@@ -108,7 +106,7 @@ def solution_to_records(
             test_case_id=test_case_id_start + i,
             problem_id=problem_id,
             programming_language=tc.language.value,
-            code=tc.code,
+            test=tc.test,
             is_example=tc.is_example,
         )
         for i, tc in enumerate(solution.test_cases)

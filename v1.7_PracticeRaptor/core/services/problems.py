@@ -20,7 +20,6 @@ from core.ports.repositories import IProblemRepository
 def get_problem(
     problem_id: int,
     repo: IProblemRepository,
-    locale: str = "en",
 ) -> Problem | None:
     """Get complete problem by ID.
 
@@ -29,22 +28,20 @@ def get_problem(
     Args:
         problem_id: Problem ID
         repo: Problem repository (any implementation)
-        locale: Language for localized content
 
     Returns:
         Problem with all details or None if not found
 
     Example:
-        problem = get_problem(1, json_repo, locale="ru")
+        problem = get_problem(1, json_repo)
         if problem:
             print(problem.title.get("ru"))
     """
-    return repo.get_by_id(problem_id, locale)
+    return repo.get_by_id(problem_id)
 
 
 def get_problem_summaries(
     repo: IProblemRepository,
-    locale: str = "en",
     difficulty: Difficulty | None = None,
     category: Category | None = None,
     tag: str | None = None,
@@ -56,7 +53,6 @@ def get_problem_summaries(
 
     Args:
         repo: Problem repository
-        locale: Language for titles
         difficulty: Filter by difficulty (optional)
         category: Filter by category (optional)
         tag: Filter by tag (optional)
@@ -73,7 +69,6 @@ def get_problem_summaries(
         problems = get_problem_summaries(repo, tag="hash-table")
     """
     summaries = repo.get_all_summaries(
-        locale=locale,
         difficulty=difficulty,
         category=category,
         tag=tag,
@@ -88,7 +83,6 @@ def get_problem_summaries(
 
 def get_random_problem(
     repo: IProblemRepository,
-    locale: str = "en",
     difficulty: Difficulty | None = None,
     category: Category | None = None,
     exclude_ids: list[int] | None = None,
@@ -99,7 +93,6 @@ def get_random_problem(
 
     Args:
         repo: Problem repository
-        locale: Language for content
         difficulty: Filter by difficulty (optional)
         category: Filter by category (optional)
         exclude_ids: Problem IDs to exclude (e.g., already solved)
@@ -117,7 +110,6 @@ def get_random_problem(
     """
     summaries = get_problem_summaries(
         repo=repo,
-        locale=locale,
         difficulty=difficulty,
         category=category,
     )
@@ -130,7 +122,7 @@ def get_random_problem(
         return None
 
     chosen = random.choice(available)
-    return repo.get_by_id(chosen.id, locale)
+    return repo.get_by_id(chosen.id)
 
 
 # ============================================================

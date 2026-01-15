@@ -6,6 +6,7 @@ from core.domain.enums import (
     Category,
     Complexity,
     Difficulty,
+    Language,
     ProblemStatus,
     ProgrammingLanguage,
 )
@@ -63,7 +64,6 @@ def records_to_problem(
     hint_recs: list[HintRecord],
     tag_recs: list[TagRecord],
     editorial_recs: list[EditorialRecord],
-    status: ProblemStatus = ProblemStatus.NOT_STARTED,
 ) -> Problem:
     """Assemble Problem domain model from persistence records.
 
@@ -103,7 +103,7 @@ def records_to_problem(
     )
 
     return Problem(
-        id=problem_rec.problem_id,
+        id=problem_rec.id,
         title=_group_by_language(title_recs, "title"),
         description=_group_by_language(description_recs, "description"),
         difficulty=Difficulty(problem_rec.difficulty),
@@ -114,9 +114,11 @@ def records_to_problem(
         hints=hints,
         editorial=_group_by_language(editorial_recs, "editorial"),
         supported_languages=tuple(
-            ProgrammingLanguage(lang) for lang in problem_rec.supported_languages
+            Language(lang) for lang in problem_rec.supported_languages
         ),
-        status=status,
+        supported_programming_languages=tuple(
+            ProgrammingLanguage(lang) for lang in problem_rec.supported_programming_languages
+        ),
     )
 
 
@@ -124,28 +126,25 @@ def records_to_problem_summary(
     problem_rec: ProblemRecord,
     title_recs: list[TitleRecord],
     tag_recs: list[TagRecord],
-    locale: str,
     status: ProblemStatus = ProblemStatus.NOT_STARTED,
 ) -> ProblemSummary:
     """Create lightweight ProblemSummary for list display.
 
     Only loads essential data - no descriptions, examples, hints.
     """
-    # Find title for requested locale (fallback to en)
-    title = ""
-    for rec in title_recs:
-        if rec.language == locale:
-            title = rec.title
-            break
-        if rec.language == "en":
-            title = rec.title  # Fallback
-
     return ProblemSummary(
-        id=problem_rec.problem_id,
-        title=title,
+        id=problem_rec.id,
+        title=_group_by_language(title_recs, "title"),
         difficulty=Difficulty(problem_rec.difficulty),
+        complexity=Complexity(problem_rec.complexity),
         categories=tuple(Category(c) for c in problem_rec.categories),
         tags=tuple(r.tag for r in tag_recs),
+        supported_languages=tuple(
+            Language(lang) for lang in problem_rec.supported_languages
+        ),
+        supported_programming_languages=tuple(
+            ProgrammingLanguage(lang) for lang in problem_rec.supported_programming_languages
+        ),
         status=status,
     )
 
@@ -183,11 +182,12 @@ def problem_to_records(
         Container with all generated records
     """
     problem_rec = ProblemRecord(
-        problem_id=problem.id,
+        id=problem.id,
         difficulty=problem.difficulty.value,
         complexity=problem.complexity.value,
         categories=[c.value for c in problem.categories],
         supported_languages=[lang.value for lang in problem.supported_languages],
+        supported_programming_languages=[lang.value for lang in problem.supported_programming_languages],
     )
 
     title_recs = _localized_to_records(

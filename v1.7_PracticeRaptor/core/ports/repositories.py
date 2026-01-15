@@ -12,12 +12,11 @@ class IProblemRepository(Protocol):
     Implementations: JsonProblemRepository, SqliteProblemRepository
     """
 
-    def get_by_id(self, problem_id: int, locale: str = "en") -> Problem | None:
+    def get_by_id(self, problem_id: int) -> Problem | None:
         """Get complete problem by ID.
 
         Args:
             problem_id: Problem ID
-            locale: Preferred language for localized content
 
         Returns:
             Problem with all details or None if not found
@@ -26,7 +25,6 @@ class IProblemRepository(Protocol):
 
     def get_all_summaries(
         self,
-        locale: str = "en",
         difficulty: Difficulty | None = None,
         category: Category | None = None,
         tag: str | None = None,
@@ -34,7 +32,6 @@ class IProblemRepository(Protocol):
         """Get lightweight problem list for display.
 
         Args:
-            locale: Language for titles
             difficulty: Filter by difficulty
             category: Filter by category
             tag: Filter by tag

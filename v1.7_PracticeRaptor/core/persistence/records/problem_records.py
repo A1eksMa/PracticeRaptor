@@ -18,7 +18,6 @@ class ProblemRecord:
     difficulty: str  # "easy", "medium", "hard"
     complexity: str  # "O(n)", "O(n²)", etc.
     categories: list[str]  # ["Array", "Hash Table"]
-    tags: list[str]  # ["array", "OneString Solution"]
     supported_languages: list[str]  # ["en", "ru"]
     supported_programming_languages: list[str]  # ["python3", "java"]
 

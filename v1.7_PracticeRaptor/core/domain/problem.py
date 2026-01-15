@@ -75,7 +75,7 @@ class Problem:
         """Convert to lightweight summary for list display."""
         return ProblemSummary(
             id=self.id,
-            title=self.title.get(locale),
+            title=self.title,
             difficulty=self.difficulty,
             complexity=self.complexity,
             categories=self.categories,

@@ -3,9 +3,10 @@
 from enum import Enum
 
 
-Language(str, Enum):
+class Language(str, Enum):
     """Supported languages for UI."""
 
+    EN = "en"
     RU = "ru"
 
 
@@ -16,7 +17,7 @@ class ProgrammingLanguage(str, Enum):
     JAVA = "java"
 
 
-Difficulty(str, Enum):
+class Difficulty(str, Enum):
     """Problem difficulty level."""
 
     EASY = "easy"
